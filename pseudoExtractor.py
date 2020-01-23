@@ -54,6 +54,7 @@ def signal_reader(filename=None):
     print(df)
     return df
 
+
 def event_reader(filename=None):
     eventFile = get_file()
     df = pd.read_csv(eventFile, sep="\t", header=None, index_col=None)
