@@ -54,6 +54,16 @@ def signal_reader(filename=None):
     print(df)
     return df
 
+def get_Hela():
+    helaFile = get_file()
+    dfControl = pd.read_csv(helaFile, sep=' ', header=None)
+    print(dfControl)
+    helaFile = get_file()
+    dfModified = pd.read_csv(helaFile, sep=' ', header=None)
+    print(dfModified)
+    return dfControl, dfModified
+
+
 
 def event_reader(filename=None):
     eventFile = get_file()
@@ -62,9 +72,9 @@ def event_reader(filename=None):
     #create headers
     header = ['mean', 'stdv', 'start', 'length', 'model_state', 'move', 'weights', 'p_model_state', 'mp_state', 'p_mp_state', 'p_A', 'p_C', 'p_G', 'p_T']
     df.columns = header[:len(df.columns)]
-    print(df)
     return df
 
 #extract_modification()
-event_reader("./read_746_signals.txt")
+#event_reader("./read_746_signals.txt")
+#get_Hela()
 
