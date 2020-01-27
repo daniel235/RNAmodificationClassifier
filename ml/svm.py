@@ -33,6 +33,8 @@ class createSVM():
                 self.clf.fit(self.trainX[i], self.trainY[i])
                 #test accuracies
                 predictions = self.clf.predict(self.testX[i])
+                print("predictions", predictions)
+                print("actual results", self.testY[i])
                 self.accuracies.append(accuracy_score(self.testY[i], predictions))
                 print(self.accuracies[i])
                 #save accuracies
@@ -61,6 +63,7 @@ class createSVM():
             self.testX.append(self.X[test_index])
             self.trainY.append(self.Y[train_index])
             self.testY.append(self.Y[test_index])
+
 
     #find out what features are valuable
     def featureImportance(self):
