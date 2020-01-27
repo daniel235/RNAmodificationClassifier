@@ -1,8 +1,11 @@
 from sklearn import svm
+from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import KFold
 import pickle
+import matplotlib.pyplot as plt
 import numpy as np
+import platform
 
 
 class createSVM():
@@ -34,7 +37,9 @@ class createSVM():
                 print(self.accuracies[i])
                 #save accuracies
                 f.write(str(self.accuracies[i]))
+                f.write("\n")
 
+        
         #save model
         fname = "./results/svm"
         with open(fname, 'wb+') as f:
@@ -57,4 +62,17 @@ class createSVM():
             self.trainY.append(self.Y[train_index])
             self.testY.append(self.Y[test_index])
 
+    #find out what features are valuable
+    def featureImportance(self):
+        tree = DecisionTreeClassifier(criterion='entropy')
+    
+
+    #plot feature importance
+    def f_importances(coef, names):
+        imp = coef
+        imp,names = zip(*sorted(zip(imp,names)))
+        plt.barh(range(len(names)), imp, align='center')
+        plt.yticks(range(len(names)), names)
+        if platform.system() == 'Windows':
+            plt.show()
 
