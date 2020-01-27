@@ -20,6 +20,7 @@ pseudoHela = pseudoHela.drop(drp, axis=1)
 print(controlHela.iloc[0,1])
 
 kmerData = []
+#!cut data to 500
 for i in range(len(controlHela)):
     kmer = controlHela.iloc[i, 0]
     kmerData.append([kmer])
@@ -69,6 +70,10 @@ Xval = []
 Y = []
 Yval = []
 
+#get random indexes
+total = len(controlHela) + len(pseudoHela)
+indexes = np.random.choice(total, total, replace=False)
+
 
 for i in range(len(kmerData)):
     X.append(kmerData[i][0])
@@ -106,9 +111,9 @@ for i in range(len(Xval)):
     for j in range(len(X[i])):
         Xval[i].append(X[i][j])
 
-
-X = Xval
-Y = Yval
+#randomize indexes
+X = np.array(Xval)[indexes]
+Y = np.array(Yval)[indexes]
 print(len(X), len(Y))
 
 

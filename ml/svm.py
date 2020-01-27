@@ -3,6 +3,7 @@ from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.model_selection import KFold
+from sklearn.metrics import confusion_matrix
 import pickle
 import matplotlib.pyplot as plt
 import numpy as np
@@ -33,19 +34,18 @@ class createSVM():
             for i in range(n_splits):
                 self.clf.fit(self.trainX[i], self.trainY[i])
                 #test accuracies
+                self.confusionMatrix()
                 predictions = self.clf.predict(self.testX[i])
-                for l in range(len(predictions)):
-                    print("pred ", predictions[l])
-
-                for a in range(len(self.testY[i])):
-                    print("actual ", self.testY[i][a])
-
+                confusion_matrix(self.testY[i], predictions)
+                print(confusion_matrix)
+                #write accuracies 
                 self.accuracies.append(accuracy_score(self.testY[i], predictions))
                 print(self.accuracies[i])
                 #save accuracies
                 f.write(str(self.accuracies[i]))
                 f.write("\n")
 
+        
         
         #save model
         fname = "./results/svm"
@@ -76,14 +76,10 @@ class createSVM():
         model = ExtraTreesClassifier()
         model.fit(self.X, self.Y)
         print(model.feature_importances_)
-    
 
-    #plot feature importance
-    def f_importances(coef, names):
-        imp = coef
-        imp,names = zip(*sorted(zip(imp,names)))
-        plt.barh(range(len(names)), imp, align='center')
-        plt.yticks(range(len(names)), names)
+
+    def confusionMatrix(self):
+        display = plot_confusion_matrix(self.clf, self.testX[4], self.test[Y], cmap=plt.cm.Blues)
+        display.ax_.set_title("Confusion Matrix")
         if platform.system() == 'Windows':
             plt.show()
-
