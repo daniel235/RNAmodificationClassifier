@@ -27,7 +27,7 @@ class createSVM():
         for i in range(n_splits):
             self.clf.fit(self.trainX[i], self.trainY[i])
             #test accuracies
-            predictions = self.clf.predict(self.testX)
+            predictions = self.clf.predict(self.testX[i])
             self.accuracies.append(accuracy_score(self.testY, predictions))
             print(self.accuracies[i])
 
