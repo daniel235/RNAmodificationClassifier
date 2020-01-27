@@ -33,7 +33,7 @@ class createSVM():
                 self.accuracies.append(accuracy_score(self.testY[i], predictions))
                 print(self.accuracies[i])
                 #save accuracies
-                f.write(self.accuracies[i])
+                f.write(str(self.accuracies[i]))
 
         #save model
         fname = "./results/svm"
