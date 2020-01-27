@@ -1,6 +1,7 @@
 from sklearn import svm
 from sklearn.metrics import accuracy_score
 from sklearn.model_selection import KFold
+import pickle
 import numpy as np
 
 
@@ -24,12 +25,20 @@ class createSVM():
         self.Y = np.array(Y)
         
         self.splitData(n_splits)
-        for i in range(n_splits):
-            self.clf.fit(self.trainX[i], self.trainY[i])
-            #test accuracies
-            predictions = self.clf.predict(self.testX[i])
-            self.accuracies.append(accuracy_score(self.testY, predictions))
-            print(self.accuracies[i])
+        with open("./results/accuracies.txt", 'w+') as f:
+            for i in range(n_splits):
+                self.clf.fit(self.trainX[i], self.trainY[i])
+                #test accuracies
+                predictions = self.clf.predict(self.testX[i])
+                self.accuracies.append(accuracy_score(self.testY[i], predictions))
+                print(self.accuracies[i])
+                #save accuracies
+                f.write(self.accuracies[i])
+
+        #save model
+        fname = "./results/svm"
+        with open(fname, 'wb+') as f:
+            pickle.dump(self.clf, f)
 
 
     def tuneParameters(self):
