@@ -25,16 +25,15 @@ def get_file(read_mode=None):
     
     else:
         #manualy select file
-        path = input("Enter in file from data folder")
         #list files
         list_of_files = os.listdir("./data")
         print("List of files in data directory")
         for i in range(len(list_of_files)):
             print((i + 1), ' ', list_of_files[i])
 
-        choice = input("Select File")
+        choice = input("Select File ")
         if choice != None:
-            fname = "./data/" + list_of_files[choice - 1]
+            fname = "./data/" + list_of_files[int(choice) - 1]
             return open(fname, 'r')
 
     #if no file selected end run
