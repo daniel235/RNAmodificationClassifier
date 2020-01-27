@@ -1,7 +1,7 @@
 from sklearn.preprocessing import OneHotEncoder
 from sklearn import preprocessing
 import pandas as pd
-from statistics import mean
+from statistics import mean, median
 import numpy as np
 import sys
 import pseudoExtractor as ps
@@ -68,29 +68,16 @@ X = []
 Xval = []
 Y = []
 Yval = []
-'''
+
+
 for i in range(len(kmerData)):
     X.append(kmerData[i][0])
-    Xval.append(kmerData[i][1:])
-    Y.append(0)
 
 
 for i in range(len(pseudoKmerData)):
     X.append(pseudoKmerData[i][0])
-    Xval.append(pseudoKmerData[i][1:])
-    Y.append(1)
-'''
-for i in range(len(kmerData)):
-    for j in range(1, len(kmerData[i])):
-        Xval.append([kmerData[i][j]])
-        Yval.append([0])
 
-for i in range(len(pseudoKmerData)):
-    for j in range(1, len(pseudoKmerData[i])):
-        Xval.append([pseudoKmerData[i][j]])
-        Yval.append([1])
 
-'''
 le = preprocessing.LabelEncoder()
 le.fit(X)
 print(le.classes_)
@@ -103,13 +90,23 @@ enc.fit(X)
 onehots = enc.transform(X).toarray()
 X = onehots
 
-Xinput = []
-#insert signal Feature
-for i in range(len(X)):
-    Xinput.append([list(X[i]), mean(Xval[i])])
 
-X = Xinput
-'''
+for i in range(len(kmerData)):
+    Xval.append([mean(kmerData[i][1:]), median(kmerData[i][1:]), max(kmerData[i][1:]), min(kmerData[i][1:])])
+    Yval.append([0])
+
+
+for i in range(len(pseudoKmerData)):
+    Xval.append([mean(pseudoKmerData[i][1:]), median(pseudoKmerData[i][1:]), max(pseudoKmerData[i][1:]), min(pseudoKmerData[i][1:])])
+    Yval.append([1])
+
+
+#insert signal Feature
+for i in range(len(Xval)):
+    for j in range(len(X[i])):
+        Xval[i].append(X[i][j])
+
+
 X = Xval
 Y = Yval
 print(len(X), len(Y))
@@ -117,5 +114,5 @@ print(len(X), len(Y))
 
 ##################   Call SVM   #######################
 model = svm.createSVM()
-model.runSVM(X, Y)
+model.runSVM(X, Y, 5)
 
