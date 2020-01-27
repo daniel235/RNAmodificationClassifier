@@ -1,6 +1,7 @@
 from sklearn import svm
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
+from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.model_selection import KFold
 import pickle
 import matplotlib.pyplot as plt
@@ -26,15 +27,19 @@ class createSVM():
     def runSVM(self, X, Y, n_splits):
         self.X = np.array(X)
         self.Y = np.array(Y)
-        
+        self.featureImportance()
         self.splitData(n_splits)
         with open("./results/accuracies.txt", 'w+') as f:
             for i in range(n_splits):
                 self.clf.fit(self.trainX[i], self.trainY[i])
                 #test accuracies
                 predictions = self.clf.predict(self.testX[i])
-                print("predictions", predictions)
-                print("actual results", self.testY[i])
+                for l in range(len(predictions)):
+                    print("pred ", predictions[l])
+
+                for a in range(len(self.testY[i])):
+                    print("actual ", self.testY[i][a])
+
                 self.accuracies.append(accuracy_score(self.testY[i], predictions))
                 print(self.accuracies[i])
                 #save accuracies
@@ -67,7 +72,10 @@ class createSVM():
 
     #find out what features are valuable
     def featureImportance(self):
-        tree = DecisionTreeClassifier(criterion='entropy')
+        #tree = DecisionTreeClassifier(criterion='entropy')
+        model = ExtraTreesClassifier()
+        model.fit(self.X, self.Y)
+        print(model.feature_importances_)
     
 
     #plot feature importance
