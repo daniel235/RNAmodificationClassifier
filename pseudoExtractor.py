@@ -1,6 +1,8 @@
 import numpy as np
 import pandas as pd
 import tkinter, tkinter.filedialog
+import os
+import platform
 import h5py
 from ont_fast5_api.fast5_interface import get_fast5_file
 
@@ -10,15 +12,30 @@ from ont_fast5_api.fast5_interface import get_fast5_file
 '''
 
 def get_file(read_mode=None):
-    #select file
-    root = tkinter.Tk()
-    if read_mode == None:
-        file = tkinter.filedialog.askopenfile(parent=root, mode='rb', title='Choose a file')
-    else:
-        file = tkinter.filedialog.askopenfile(parent=root, mode=read_mode, title='Choose a file')
+    if platform.system() == 'Windows':
+        #select file
+        root = tkinter.Tk()
+        if read_mode == None:
+            file = tkinter.filedialog.askopenfile(parent=root, mode='rb', title='Choose a file')
+        else:
+            file = tkinter.filedialog.askopenfile(parent=root, mode=read_mode, title='Choose a file')
 
-    if file != None:
-        return file
+        if file != None:
+            return file
+    
+    else:
+        #manualy select file
+        path = input("Enter in file from data folder")
+        #list files
+        list_of_files = os.listdir("./data")
+        print("List of files in data directory")
+        for i in range(len(list_of_files)):
+            print((i + 1), ' ', list_of_files[i])
+
+        choice = input("Select File")
+        if choice != None:
+            fname = "./data/" + list_of_files[choice - 1]
+            return open(fname, 'r')
 
     #if no file selected end run
     raise Exception
