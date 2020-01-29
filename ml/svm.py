@@ -15,7 +15,7 @@ class createSVM():
         Class takes optional kernel
     '''
     def __init__(self, kernelType=None):
-        self.clf = svm.SVC()
+        self.clf = svm.SVC(kernel='poly')
         self.X = None
         self.Y = None
         self.trainX = []
@@ -28,16 +28,15 @@ class createSVM():
     def runSVM(self, X, Y, n_splits):
         self.X = np.array(X)
         self.Y = np.array(Y)
-        self.featureImportance()
+        #self.featureImportance()
         self.splitData(n_splits)
         with open("./results/accuracies.txt", 'w+') as f:
             for i in range(n_splits):
                 self.clf.fit(self.trainX[i], self.trainY[i])
                 #test accuracies
-                self.confusionMatrix()
                 predictions = self.clf.predict(self.testX[i])
-                confusion_matrix(self.testY[i], predictions)
-                print(confusion_matrix)
+                print(confusion_matrix(self.testY[i], predictions))
+                
                 #write accuracies 
                 self.accuracies.append(accuracy_score(self.testY[i], predictions))
                 print(self.accuracies[i])
@@ -62,8 +61,6 @@ class createSVM():
         kf.get_n_splits(self.X)
         for train_index, test_index in kf.split(self.X):
             #print indexes
-            print(train_index)
-            print(test_index)
             self.trainX.append(self.X[train_index])
             self.testX.append(self.X[test_index])
             self.trainY.append(self.Y[train_index])
@@ -76,10 +73,3 @@ class createSVM():
         model = ExtraTreesClassifier()
         model.fit(self.X, self.Y)
         print(model.feature_importances_)
-
-
-    def confusionMatrix(self):
-        display = plot_confusion_matrix(self.clf, self.testX[4], self.test[Y], cmap=plt.cm.Blues)
-        display.ax_.set_title("Confusion Matrix")
-        if platform.system() == 'Windows':
-            plt.show()

@@ -21,6 +21,7 @@ print(controlHela.iloc[0,1])
 
 kmerData = []
 #!cut data to 500
+#for i in range(len(controlHela)):
 for i in range(len(controlHela)):
     kmer = controlHela.iloc[i, 0]
     kmerData.append([kmer])
@@ -71,7 +72,14 @@ Y = []
 Yval = []
 
 #get random indexes
-total = len(controlHela) + len(pseudoHela)
+#total = len(controlHela) + len(pseudoHela)
+totalControl = 300
+prevIndexes = np.random.choice(len(controlHela), 360, replace=False)
+#set length to 300(random choices)
+kmerData = np.array(kmerData)[prevIndexes]
+#kmerData = kmerData[:360]
+print("size of ", len(kmerData))
+total = 360 + len(pseudoHela)
 indexes = np.random.choice(total, total, replace=False)
 
 
@@ -106,10 +114,11 @@ for i in range(len(pseudoKmerData)):
     Yval.append([1])
 
 
-#insert signal Feature
+#insert one hot Feature
 for i in range(len(Xval)):
     for j in range(len(X[i])):
         Xval[i].append(X[i][j])
+
 
 #randomize indexes
 X = np.array(Xval)[indexes]
@@ -119,5 +128,5 @@ print(len(X), len(Y))
 
 ##################   Call SVM   #######################
 model = svm.createSVM()
-model.runSVM(X, Y, 5)
+model.runSVM(X, Y, 3)
 
