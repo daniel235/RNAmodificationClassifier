@@ -7,8 +7,11 @@ import sys
 import pseudoExtractor as ps
 
 sys.path.insert(1, "./ml/")
+sys.path.insert(2, "./scripts/")
 import ml.svm as svm
 import ml.knn as knn
+import scripts.complete as complete
+
 
 #start pseudoExtractor 
 controlHela, pseudoHela = ps.get_Hela()
@@ -19,6 +22,8 @@ controlHela = controlHela.drop(drp, axis=1)
 pseudoHela = pseudoHela.drop(drp, axis=1)
 
 print(controlHela.iloc[0,1])
+complete.send_email("Test email")
+
 
 kmerData = []
 #!cut data to 500
@@ -112,12 +117,12 @@ for i in range(len(pseudoKmerData)):
     Xval.append([mean(pseudoKmerData[i][1:]), median(pseudoKmerData[i][1:]), max(pseudoKmerData[i][1:]), min(pseudoKmerData[i][1:])])
     Yval.append([1])
 
-
+'''
 #insert one hot Feature
 for i in range(len(Xval)):
     for j in range(len(X[i])):
         Xval[i].append(X[i][j])
-
+'''
 
 #randomize indexes
 X = np.array(Xval)[indexes]
