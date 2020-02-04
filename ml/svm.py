@@ -1,6 +1,9 @@
 from sklearn import svm
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import accuracy_score
+from sklearn.pipeline import Pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import PolynomialFeatures
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.model_selection import KFold
 from sklearn.metrics import confusion_matrix
@@ -16,6 +19,7 @@ class createSVM():
     '''
     def __init__(self, kernelType=None):
         self.clf = svm.SVC(kernel='poly')
+        self.polysvm = None
         self.X = None
         self.Y = None
         self.trainX = []
@@ -44,8 +48,16 @@ class createSVM():
                 f.write(str(self.accuracies[i]))
                 f.write("\n")
 
-        
-        
+                #write poly svm accuracies
+                self.pipelineSVM(self.trainX[i], self.trainY[i])
+                predictions = self.polysvm.predict(self.testX[i])
+                print(confusion_matrix(self.testY[i], predictions))
+
+                #write accuracies
+                polyLine = "pipeline accuracy: " + str(accuracy_score(self.testY[i], predictions)) + "\n"
+                f.write(polyLine)
+                
+
         #save model
         fname = "./results/svm"
         with open(fname, 'wb+') as f:
@@ -73,3 +85,13 @@ class createSVM():
         model = ExtraTreesClassifier()
         model.fit(self.X, self.Y)
         print(model.feature_importances_)
+
+    
+    def pipelineSVM(self, x, y, polydegree=3, Cval=10, linearloss="hinge"):
+        self.polysvm = Pipeline([
+            ("poly features", PolynomialFeatures(degree=polydegree)),
+            ("scaler", StandardScaler()),
+            ("svm_clf", svm.LinearSVC(C=Cval, loss=linearloss))
+        ])
+
+        self.polysvm.fit(x, y)

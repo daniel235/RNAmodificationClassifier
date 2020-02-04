@@ -8,6 +8,7 @@ import pseudoExtractor as ps
 
 sys.path.insert(1, "./ml/")
 import ml.svm as svm
+import ml.knn as knn
 
 #start pseudoExtractor 
 controlHela, pseudoHela = ps.get_Hela()
@@ -72,12 +73,10 @@ Y = []
 Yval = []
 
 #get random indexes
-#total = len(controlHela) + len(pseudoHela)
-totalControl = 300
-prevIndexes = np.random.choice(len(controlHela), 360, replace=False)
+prevIndexes = np.random.choice(len(controlHela), 460, replace=False)
+
 #set length to 300(random choices)
 kmerData = np.array(kmerData)[prevIndexes]
-#kmerData = kmerData[:360]
 print("size of ", len(kmerData))
 total = 360 + len(pseudoHela)
 indexes = np.random.choice(total, total, replace=False)
@@ -127,6 +126,12 @@ print(len(X), len(Y))
 
 
 ##################   Call SVM   #######################
+
 model = svm.createSVM()
 model.runSVM(X, Y, 3)
 
+##################   Call KNN   #######################
+'''
+kneighbors = knn.createKNN()
+kneighbors.runKNN(3, X, Y)
+'''
