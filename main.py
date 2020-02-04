@@ -22,7 +22,6 @@ controlHela = controlHela.drop(drp, axis=1)
 pseudoHela = pseudoHela.drop(drp, axis=1)
 
 print(controlHela.iloc[0,1])
-complete.send_email("Test email")
 
 
 kmerData = []
