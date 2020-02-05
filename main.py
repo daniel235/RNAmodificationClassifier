@@ -116,12 +116,12 @@ for i in range(len(pseudoKmerData)):
     Xval.append([mean(pseudoKmerData[i][1:]), median(pseudoKmerData[i][1:]), max(pseudoKmerData[i][1:]), min(pseudoKmerData[i][1:])])
     Yval.append([1])
 
-'''
+
 #insert one hot Feature
 for i in range(len(Xval)):
     for j in range(len(X[i])):
         Xval[i].append(X[i][j])
-'''
+
 
 #randomize indexes
 X = np.array(Xval)[indexes]

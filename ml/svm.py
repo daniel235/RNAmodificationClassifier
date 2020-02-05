@@ -36,6 +36,7 @@ class createSVM():
         self.splitData(n_splits)
         with open("./results/accuracies.txt", 'w+') as f:
             for i in range(n_splits):
+                '''
                 self.clf.fit(self.trainX[i], self.trainY[i])
                 #test accuracies
                 predictions = self.clf.predict(self.testX[i])
@@ -47,7 +48,7 @@ class createSVM():
                 #save accuracies
                 f.write(str(self.accuracies[i]))
                 f.write("\n")
-
+                '''
                 #write poly svm accuracies
                 self.pipelineSVM(self.trainX[i], self.trainY[i])
                 predictions = self.polysvm.predict(self.testX[i])
@@ -91,7 +92,7 @@ class createSVM():
         self.polysvm = Pipeline([
             ("poly features", PolynomialFeatures(degree=polydegree)),
             ("scaler", StandardScaler()),
-            ("svm_clf", svm.LinearSVC(C=Cval, loss=linearloss))
+            ("svm_clf", svm.LinearSVC(C=Cval, loss=linearloss, verbose=1))
         ])
 
         self.polysvm.fit(x, y)
