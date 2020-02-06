@@ -1,0 +1,3 @@
+pipeline accuracy: 0.4609053497942387
+pipeline accuracy: 0.5267489711934157
+pipeline accuracy: 0.5785123966942148

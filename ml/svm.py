@@ -32,6 +32,8 @@ class createSVM():
     def runSVM(self, X, Y, n_splits):
         self.X = np.array(X)
         self.Y = np.array(Y)
+        #reshape y
+        self.Y = self.Y.reshape((len(self.X),))
         #self.featureImportance()
         self.splitData(n_splits)
         with open("./results/accuracies.txt", 'w+') as f:
@@ -50,10 +52,10 @@ class createSVM():
                 f.write("\n")
                 '''
                 #write poly svm accuracies
-                self.pipelineSVM(self.trainX[i], self.trainY[i])
+                self.pipelineSVM(self.trainX[i], self.trainY[i], Cval=10, max=10000000)
                 predictions = self.polysvm.predict(self.testX[i])
                 print(confusion_matrix(self.testY[i], predictions))
-
+                print(self.polysvm.score(self.testX[i], self.testY[i]))
                 #write accuracies
                 polyLine = "pipeline accuracy: " + str(accuracy_score(self.testY[i], predictions)) + "\n"
                 f.write(polyLine)
@@ -66,7 +68,8 @@ class createSVM():
 
 
     def tuneParameters(self):
-        pass
+        maxCVal = 10
+
 
 
     def splitData(self, splits):
@@ -88,11 +91,16 @@ class createSVM():
         print(model.feature_importances_)
 
     
-    def pipelineSVM(self, x, y, polydegree=3, Cval=10, linearloss="hinge"):
+    def pipelineSVM(self, x, y, polydegree=3, Cval=10, linearloss="hinge", max=1000):
         self.polysvm = Pipeline([
             ("poly features", PolynomialFeatures(degree=polydegree)),
             ("scaler", StandardScaler()),
-            ("svm_clf", svm.LinearSVC(C=Cval, loss=linearloss, verbose=1))
+            ("svm_clf", svm.LinearSVC(C=Cval, loss=linearloss, verbose=1, max_iter=max))
         ])
 
         self.polysvm.fit(x, y)
+
+    
+    def plotSupportVectors(self, svm):
+        decisionFunction = svm.decision_function(X)
+        

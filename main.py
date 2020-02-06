@@ -10,6 +10,7 @@ sys.path.insert(1, "./ml/")
 sys.path.insert(2, "./scripts/")
 import ml.svm as svm
 import ml.knn as knn
+import ml.cnn as cnn
 import scripts.complete as complete
 
 
@@ -77,15 +78,15 @@ Y = []
 Yval = []
 
 #get random indexes
-prevIndexes = np.random.choice(len(controlHela), 460, replace=False)
+prevIndexes = np.random.choice(len(controlHela), 364, replace=False)
 
 #set length to 300(random choices)
 kmerData = np.array(kmerData)[prevIndexes]
 print("size of ", len(kmerData))
-total = 360 + len(pseudoHela)
+total = 364 + len(pseudoHela)
 indexes = np.random.choice(total, total, replace=False)
 
-
+#adding kmer 
 for i in range(len(kmerData)):
     X.append(kmerData[i][0])
 
@@ -106,22 +107,27 @@ enc.fit(X)
 onehots = enc.transform(X).toarray()
 X = onehots
 
+#for cnn 
+
+
 
 for i in range(len(kmerData)):
-    Xval.append([mean(kmerData[i][1:]), median(kmerData[i][1:]), max(kmerData[i][1:]), min(kmerData[i][1:])])
+    #Xval.append([mean(kmerData[i][1:]), median(kmerData[i][1:]), max(kmerData[i][1:]), min(kmerData[i][1:])])
+    Xval.append([kmerData[i][0], mean(kmerData[i][1:]), median(kmerData[i][1:]), max(kmerData[i][1:]), min(kmerData[i][1:])])
     Yval.append([0])
 
 
 for i in range(len(pseudoKmerData)):
-    Xval.append([mean(pseudoKmerData[i][1:]), median(pseudoKmerData[i][1:]), max(pseudoKmerData[i][1:]), min(pseudoKmerData[i][1:])])
+    #Xval.append([mean(pseudoKmerData[i][1:]), median(pseudoKmerData[i][1:]), max(pseudoKmerData[i][1:]), min(pseudoKmerData[i][1:])])
+    Xval.append([kmerData[i][0], mean(pseudoKmerData[i][1:]), median(pseudoKmerData[i][1:]), max(pseudoKmerData[i][1:]), min(pseudoKmerData[i][1:])])
     Yval.append([1])
 
-
+'''
 #insert one hot Feature
 for i in range(len(Xval)):
     for j in range(len(X[i])):
         Xval[i].append(X[i][j])
-
+'''
 
 #randomize indexes
 X = np.array(Xval)[indexes]
@@ -130,12 +136,18 @@ print(len(X), len(Y))
 
 
 ##################   Call SVM   #######################
-
+'''
 model = svm.createSVM()
 model.runSVM(X, Y, 3)
-
+'''
 ##################   Call KNN   #######################
 '''
 kneighbors = knn.createKNN()
 kneighbors.runKNN(3, X, Y)
 '''
+
+##################   Call CNN   #######################
+
+model = cnn.createCNN(X, Y, 3)
+model.run_model()
+
