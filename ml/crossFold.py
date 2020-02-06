@@ -1,8 +1,11 @@
 from sklearn.model_selection import KFold
+import numpy as np
 
 
 def splitData(splits, X, Y):
         #returned data structs
+        X = np.array(X)
+        Y = np.array(Y)
         trainX = []
         trainY = []
         testX = []
