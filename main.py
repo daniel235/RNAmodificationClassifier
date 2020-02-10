@@ -121,7 +121,7 @@ for i in range(len(kmerData)):
 
 for i in range(len(pseudoKmerData)):
     Xval.append([mean(pseudoKmerData[i][1:]), median(pseudoKmerData[i][1:]), max(pseudoKmerData[i][1:]), min(pseudoKmerData[i][1:]), np.std(pseudoKmerData[i][1:])])
-    #Xval.append([kmerData[i][0], mean(pseudoKmerData[i][1:]), median(pseudoKmerData[i][1:]), max(pseudoKmerData[i][1:]), min(pseudoKmerData[i][1:])])
+    #Xval.append([kmerData[i][0], mean(pseudoKmerData[i][1:]), median(pseudoKmerData[i][1:]), max(pseudoKmerData[i][1:]), min(pseudoKmerData[i][1:]), np.std(pseudoKmerData[i][1:])])
     Yval.append([1])
 
 '''
@@ -140,7 +140,12 @@ print(len(X), len(Y))
 ##################   Call SVM   #######################
 
 model = svm.createSVM()
-model.runSVM(X, Y, 3)
+#model.runSVM(X, Y, 3)
+
+
+Y = np.array(Y)
+Y = Y.reshape((len(X), ))
+lcurve.createLearningCurve(model.clf, np.array(X), Y)
 
 ##################   Call KNN   #######################
 '''
@@ -152,6 +157,8 @@ kneighbors.runKNN(3, X, Y)
 '''
 model = cnn.createCNN(X, Y, 3)
 model.run_model()
+'''
+'''
 #call learning curve
 
 model.pre_process()

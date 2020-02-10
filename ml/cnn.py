@@ -32,6 +32,7 @@ class createCNN():
         newX = []
         #bases (A C G T[U])
         for i in range(len(self.X)):
+            '''
             for j in range(len(self.X[i][0])):
                 base = self.X[i][0][j] 
                 if base == 'A':
@@ -57,13 +58,15 @@ class createCNN():
                     row.append(0)
                     row.append(0)
                     row.append(0)
-
+            '''
             #restructure X[i] row
-            '''
+            
             for k in range(1, len(self.X[i])):
+                print("data ", self.X[i][k])
                 row.append(self.X[i][k])
-            '''
+            
             row = np.array(row)
+            print("shape of new row ", row.shape)
             newX.append(row)
             row = []
 
@@ -94,7 +97,6 @@ class createCNN():
         #add model layers
         model.add(Conv1D(64, kernel_size=2, activation='relu', input_shape=(n_samples, n_feats)))
         model.add(Conv1D(32, kernel_size=2, activation='relu'))
-        model.add(Conv1D(64, kernel_size=2, activation='relu'))
         model.add(Dropout(0.5))
         model.add(MaxPooling1D(pool_size=2))
         
@@ -112,7 +114,7 @@ class createCNN():
         
         for i in range(len(self.xtrain)):
             print("i ", i)
-            model.fit(self.xtrain[i], self.ytrain[i], epochs=3)
+            model.fit(self.xtrain[i], self.ytrain[i], epochs=10)
             print("after model fit")
             #validation_data=(self.xtest[i], self.ytest[i])
             _, accuracy = model.evaluate(self.xtest[i], self.ytest[i])

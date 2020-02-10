@@ -18,7 +18,7 @@ class createSVM():
         Class takes optional kernel
     '''
     def __init__(self, kernelType=None):
-        self.clf = svm.SVC(kernel='poly')
+        self.clf = svm.SVC(kernel='poly', verbose=1)
         self.polysvm = None
         self.X = None
         self.Y = None
@@ -38,7 +38,6 @@ class createSVM():
         self.splitData(n_splits)
         with open("./results/accuracies.txt", 'w+') as f:
             for i in range(n_splits):
-                '''
                 self.clf.fit(self.trainX[i], self.trainY[i])
                 #test accuracies
                 predictions = self.clf.predict(self.testX[i])
@@ -50,7 +49,7 @@ class createSVM():
                 #save accuracies
                 f.write(str(self.accuracies[i]))
                 f.write("\n")
-                '''
+                
                 #write poly svm accuracies
                 self.pipelineSVM(self.trainX[i], self.trainY[i], Cval=10, max=10000000)
                 predictions = self.polysvm.predict(self.testX[i])
