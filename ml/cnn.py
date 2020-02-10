@@ -91,6 +91,7 @@ class createCNN():
 
     def build_seq_model(self):
         model = Sequential()
+        model.score = "accuracy"
         n_samples, n_feats = self.xtrain[0].shape[1], self.xtrain[0].shape[2]
         print("shape ", n_samples, n_feats)
         #[[],[],[]]

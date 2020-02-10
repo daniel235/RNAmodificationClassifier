@@ -140,28 +140,31 @@ print(len(X), len(Y))
 ##################   Call SVM   #######################
 
 model = svm.createSVM()
+estimator = model.pipelineSVM()
 #model.runSVM(X, Y, 3)
 
 
 Y = np.array(Y)
 Y = Y.reshape((len(X), ))
-lcurve.createLearningCurve(model.clf, np.array(X), Y)
+lcurve.createLearningCurve(estimator, np.array(X), Y, name="svm_LinearSVC")
+lcurve.createLearningCurve(model.clf, np.array(X), Y, name="SVC")
 
 ##################   Call KNN   #######################
 '''
 kneighbors = knn.createKNN()
-kneighbors.runKNN(3, X, Y)
-'''
+#kneighbors.runKNN(3, X, Y)
 
+lcurve.createLearningCurve(kneighbors.knn, X, Y, name="knn")
+'''
 ##################   Call CNN   #######################
 '''
 model = cnn.createCNN(X, Y, 3)
-model.run_model()
-'''
-'''
+#model.run_model()
+
+
 #call learning curve
 
 model.pre_process()
 estimator = model.build_seq_model()
-lcurve.createLearningCurve(estimator, model.X, model.Y)'''
-
+lcurve.createLearningCurve(estimator, model.X, model.Y)
+'''

@@ -52,6 +52,7 @@ class createSVM():
                 
                 #write poly svm accuracies
                 self.pipelineSVM(self.trainX[i], self.trainY[i], Cval=10, max=10000000)
+                self.polysvm.fit(self.trainX[i], self.trainY[i])
                 predictions = self.polysvm.predict(self.testX[i])
                 print(confusion_matrix(self.testY[i], predictions))
                 print(self.polysvm.score(self.testX[i], self.testY[i]))
@@ -90,14 +91,15 @@ class createSVM():
         print(model.feature_importances_)
 
     
-    def pipelineSVM(self, x, y, polydegree=3, Cval=10, linearloss="hinge", max=1000):
+    def pipelineSVM(self, polydegree=3, Cval=10, linearloss="hinge", max=1000):
         self.polysvm = Pipeline([
             ("poly features", PolynomialFeatures(degree=polydegree)),
             ("scaler", StandardScaler()),
             ("svm_clf", svm.LinearSVC(C=Cval, loss=linearloss, verbose=1, max_iter=max))
         ])
 
-        self.polysvm.fit(x, y)
+        return self.polysvm
+        #self.polysvm.fit(x, y)
 
     
     def plotSupportVectors(self, svm):
