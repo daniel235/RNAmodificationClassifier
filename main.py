@@ -8,10 +8,12 @@ import pseudoExtractor as ps
 
 sys.path.insert(1, "./ml/")
 sys.path.insert(2, "./scripts/")
+sys.path.insert(3, "./testing/")
 import ml.svm as svm
 import ml.knn as knn
 import ml.cnn as cnn
 import scripts.complete as complete
+import testing.learningCurve as lcurve
 
 
 #start pseudoExtractor 
@@ -107,19 +109,19 @@ enc.fit(X)
 onehots = enc.transform(X).toarray()
 X = onehots
 
-#for cnn 
-
 
 
 for i in range(len(kmerData)):
-    #Xval.append([mean(kmerData[i][1:]), median(kmerData[i][1:]), max(kmerData[i][1:]), min(kmerData[i][1:])])
-    Xval.append([kmerData[i][0], mean(kmerData[i][1:]), median(kmerData[i][1:]), max(kmerData[i][1:]), min(kmerData[i][1:])])
+    #svm input
+    Xval.append([mean(kmerData[i][1:]), median(kmerData[i][1:]), max(kmerData[i][1:]), min(kmerData[i][1:]), np.std(kmerData[i][1:])])
+    #cnn input
+    #Xval.append([kmerData[i][0], mean(kmerData[i][1:]), median(kmerData[i][1:]), max(kmerData[i][1:]), min(kmerData[i][1:]), np.std(kmerData[i][1:])])
     Yval.append([0])
 
 
 for i in range(len(pseudoKmerData)):
-    #Xval.append([mean(pseudoKmerData[i][1:]), median(pseudoKmerData[i][1:]), max(pseudoKmerData[i][1:]), min(pseudoKmerData[i][1:])])
-    Xval.append([kmerData[i][0], mean(pseudoKmerData[i][1:]), median(pseudoKmerData[i][1:]), max(pseudoKmerData[i][1:]), min(pseudoKmerData[i][1:])])
+    Xval.append([mean(pseudoKmerData[i][1:]), median(pseudoKmerData[i][1:]), max(pseudoKmerData[i][1:]), min(pseudoKmerData[i][1:]), np.std(pseudoKmerData[i][1:])])
+    #Xval.append([kmerData[i][0], mean(pseudoKmerData[i][1:]), median(pseudoKmerData[i][1:]), max(pseudoKmerData[i][1:]), min(pseudoKmerData[i][1:])])
     Yval.append([1])
 
 '''
@@ -136,10 +138,10 @@ print(len(X), len(Y))
 
 
 ##################   Call SVM   #######################
-'''
+
 model = svm.createSVM()
 model.runSVM(X, Y, 3)
-'''
+
 ##################   Call KNN   #######################
 '''
 kneighbors = knn.createKNN()
@@ -147,7 +149,12 @@ kneighbors.runKNN(3, X, Y)
 '''
 
 ##################   Call CNN   #######################
-
+'''
 model = cnn.createCNN(X, Y, 3)
 model.run_model()
+#call learning curve
+
+model.pre_process()
+estimator = model.build_seq_model()
+lcurve.createLearningCurve(estimator, model.X, model.Y)'''
 
