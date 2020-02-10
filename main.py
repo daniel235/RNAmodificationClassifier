@@ -86,7 +86,7 @@ prevIndexes = np.random.choice(len(controlHela), 364, replace=False)
 kmerData = np.array(kmerData)[prevIndexes]
 print("size of ", len(kmerData))
 total = 364 + len(pseudoHela)
-indexes = np.random.choice(total, total, replace=False)
+#indexes = np.random.choice(total, total, replace=False)
 
 #adding kmer 
 for i in range(len(kmerData)):
@@ -132,8 +132,8 @@ for i in range(len(Xval)):
 '''
 
 #randomize indexes
-X = np.array(Xval)[indexes]
-Y = np.array(Yval)[indexes]
+X = np.array(Xval)
+Y = np.array(Yval)
 print(len(X), len(Y))
 
 

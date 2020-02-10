@@ -121,3 +121,23 @@ class createCNN():
             _, accuracy = model.evaluate(self.xtest[i], self.ytest[i])
             print("acc ", accuracy)
         
+    
+    def signal_data(self, x, y, timestep=30):
+        xinputs = []
+        youtputs = []
+        signal = []
+        currentCount = 0
+        i = 0
+        #input raw signal data until signal array full
+        for j in range(30)
+            #if you run out of signal move to the next x line
+            if currentCount > len(x[i]):
+                i += 1
+                currentCount = 0
+
+            signal.append(x[i][currentCount])
+            currentCount += 1
+
+        #after 30 signals add to xinput
+        xinputs.append(signal)
+        signal = []

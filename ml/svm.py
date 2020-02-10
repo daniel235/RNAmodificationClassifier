@@ -71,7 +71,6 @@ class createSVM():
         maxCVal = 10
 
 
-
     def splitData(self, splits):
         kf = KFold(n_splits=splits, shuffle=True)
         kf.get_n_splits(self.X)
@@ -105,3 +104,6 @@ class createSVM():
     def plotSupportVectors(self, svm):
         decisionFunction = svm.decision_function(X)
         
+
+    def scaleData(self, x, y):
+        pass
