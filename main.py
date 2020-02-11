@@ -109,9 +109,11 @@ enc.fit(X)
 onehots = enc.transform(X).toarray()
 X = onehots
 
-
+allKmerData = []
 
 for i in range(len(kmerData)):
+    #signal cnn input
+    allKmerData.append(kmerData[i][1:])
     #svm input
     Xval.append([mean(kmerData[i][1:]), median(kmerData[i][1:]), max(kmerData[i][1:]), min(kmerData[i][1:]), np.std(kmerData[i][1:])])
     #cnn input
@@ -120,6 +122,8 @@ for i in range(len(kmerData)):
 
 
 for i in range(len(pseudoKmerData)):
+    #signal cnn input
+    allKmerData.append(pseudoKmerData[i][1:])
     Xval.append([mean(pseudoKmerData[i][1:]), median(pseudoKmerData[i][1:]), max(pseudoKmerData[i][1:]), min(pseudoKmerData[i][1:]), np.std(pseudoKmerData[i][1:])])
     #Xval.append([kmerData[i][0], mean(pseudoKmerData[i][1:]), median(pseudoKmerData[i][1:]), max(pseudoKmerData[i][1:]), min(pseudoKmerData[i][1:]), np.std(pseudoKmerData[i][1:])])
     Yval.append([1])
@@ -138,7 +142,7 @@ print(len(X), len(Y))
 
 
 ##################   Call SVM   #######################
-
+'''
 model = svm.createSVM()
 estimator = model.pipelineSVM()
 #model.runSVM(X, Y, 3)
@@ -148,7 +152,7 @@ Y = np.array(Y)
 Y = Y.reshape((len(X), ))
 lcurve.createLearningCurve(estimator, np.array(X), Y, name="svm_LinearSVC")
 lcurve.createLearningCurve(model.clf, np.array(X), Y, name="SVC")
-
+'''
 ##################   Call KNN   #######################
 '''
 kneighbors = knn.createKNN()
@@ -157,13 +161,14 @@ kneighbors = knn.createKNN()
 lcurve.createLearningCurve(kneighbors.knn, X, Y, name="knn")
 '''
 ##################   Call CNN   #######################
-'''
+
 model = cnn.createCNN(X, Y, 3)
-#model.run_model()
+model.signal_data(allKmerData, Yval, timestep=80)
+model.run_model()
 
 
 #call learning curve
-
+'''
 model.pre_process()
 estimator = model.build_seq_model()
 lcurve.createLearningCurve(estimator, model.X, model.Y)
