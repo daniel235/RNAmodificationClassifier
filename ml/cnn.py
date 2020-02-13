@@ -1,6 +1,6 @@
 from keras.models import Sequential
 from keras.layers import Dense, Conv1D, Conv2D, Flatten, Dropout, MaxPooling1D, LeakyReLU, GlobalAveragePooling1D, ELU
-from keras.activations import elu, selu, tanh, sigmoid, hard_sigmoid, linear
+from keras.activations import elu, selu, tanh, sigmoid, hard_sigmoid, linear, relu
 from keras.utils.np_utils import to_categorical
 from keras.optimizers import adam, Nadam, SGD, RMSprop, Adagrad, Adadelta, Adamax 
 import numpy as np
@@ -45,30 +45,30 @@ class createCNN():
             self.ytest[i] = to_categorical(self.ytest[i])
         
 
-    def build_seq_model(self, alpha = 0.5, filter = 100, kernel=15, activation=LeakyReLU(alpha=0.05), optimize='adam'):
+    def build_seq_model(self, alpha = 0.5, filter = 100, kernel=15, activator='relu', optimize='adam'):
         model = Sequential()
         n_samples, n_feats = self.xtrain[0].shape[1], self.xtrain[0].shape[2]
         #[[],[],[]]
         #add model layers
-        model.add(Conv1D(filter, kernel_size=kernel, input_shape=(n_samples, n_feats)))
-        model.add(activation)
-        model.add(Conv1D(filter, kernel_size=kernel))
-        model.add(activation)
+        model.add(Conv1D(filter, kernel_size=kernel, input_shape=(n_samples, n_feats), activation=activator))
+        #model.add(LeakyReLU(alpha=0.5))
+        model.add(Conv1D(filter, kernel_size=kernel, activation=activator))
+        #model.add(LeakyReLU(alpha=0.5))
         model.add(MaxPooling1D(pool_size=3))
         
         model.add(Conv1D(int(filter/2), kernel_size=int(kernel / 2)))
-        model.add(activation)
+        #model.add(LeakyReLU(alpha=0.5))
         
         model.add(Conv1D(int(filter/2), kernel_size=int(kernel / 2)))
-        model.add(activation)
+        #model.add(LeakyReLU(alpha=0.5))
         #model.add(GlobalAveragePooling1D())
         model.add(MaxPooling1D(pool_size=3))
         
         model.add(Dropout(0.3))
 
         model.add(Flatten())
-        model.add(Dense(50))
-        model.add(activation)
+        model.add(Dense(50, activation=activator))
+        #model.add(LeakyReLU(alpha=0.5))
         model.add(Dense(2, activation='softmax'))
 
         #optimzer 
@@ -81,26 +81,27 @@ class createCNN():
         #cross fold data
         self.pre_process()
         #get hyper parameters
-        alpha, filters, kernel, optimizers = self.hypertune_params()
+        alpha, filters, kernel, optimizers, activation = self.hypertune_params()
 
         #run every possible combination
         
         for f in filters:
             for k in kernel:
-                for o in optimizers:
-                    print("kernel ", k)
-                    model = self.build_seq_model(filter = int(f), kernel = int(k), optimize = o)
-                    
-                    for i in range(len(self.xtrain)):
-                        model.fit(self.xtrain[i], self.ytrain[i], epochs=3)
-                        #validation_data=(self.xtest[i], self.ytest[i])
-                        _, accuracy = model.evaluate(self.xtest[i], self.ytest[i])
-                        #if accuracy is greater than 80 percent write configuration to file
-                        print("acc ", accuracy)
-                        if accuracy > .80:
-                            with open("cnn_accuracy.txt", 'a+') as text:
-                                line = str(accuracy) + " Config alpha " + str(0.5) + " Filters " + str(f) + " Kernel " + str(k) + " optimizer " + str(optimizers.__class__)
-                                text.write(line)
+                for a in activation:
+                    for o in optimizers:
+                        print("kernel ", k)
+                        model = self.build_seq_model(filter = int(f), kernel = int(k), optimize = o, activator=a)
+                        
+                        for i in range(len(self.xtrain)):
+                            model.fit(self.xtrain[i], self.ytrain[i], epochs=3)
+                            #validation_data=(self.xtest[i], self.ytest[i])
+                            _, accuracy = model.evaluate(self.xtest[i], self.ytest[i])
+                            #if accuracy is greater than 80 percent write configuration to file
+                            print("acc ", accuracy)
+                            if accuracy > .80:
+                                with open("cnn_accuracy.txt", 'a+') as text:
+                                    line = str(accuracy) + " Config alpha " + str(0.5) + " Filters " + str(f) + " Kernel " + str(k) + " optimizer " + str(optimizers.__class__)
+                                    text.write(line)
 
         
     
@@ -180,7 +181,10 @@ class createCNN():
             optimizers.append(Adamax(lr=learning_rate[i]))
             optimizers.append(Nadam(lr=learning_rate[i]))
 
-        return alpha, Filters, Kernel_size, optimizers
+        #activation
+        #activations = [relu(), elu(), selu(), tanh(), sigmoid(), hard_sigmoid(), linear()]
+        activations = ['relu', 'elu', 'selu', 'tanh', 'sigmoid', 'hard_sigmoid', 'linear']
+        return alpha, Filters, Kernel_size, optimizers, activations
 
 
 
