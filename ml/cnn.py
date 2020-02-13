@@ -1,10 +1,13 @@
 from keras.models import Sequential
-from keras.layers import Dense, Conv1D, Conv2D, Flatten, Dropout, MaxPooling1D, LeakyReLU, GlobalAveragePooling1D
+from keras.layers import Dense, Conv1D, Conv2D, Flatten, Dropout, MaxPooling1D, LeakyReLU, GlobalAveragePooling1D, ELU
+from keras.activations import elu, selu, tanh, sigmoid, hard_sigmoid, linear
 from keras.utils.np_utils import to_categorical
-from keras.optimizers import adam, Nadam
+from keras.optimizers import adam, Nadam, SGD, RMSprop, Adagrad, Adadelta, Adamax 
 import numpy as np
+import sys
 
-import ml.crossFold as cfold
+
+import crossFold as cfold
 
 '''
     CNN has different input type 
@@ -42,23 +45,22 @@ class createCNN():
             self.ytest[i] = to_categorical(self.ytest[i])
         
 
-    def build_seq_model(self):
+    def build_seq_model(self, alpha = 0.5, filter = 100, kernel=15, activation=LeakyReLU(alpha=0.05), optimize='adam'):
         model = Sequential()
         n_samples, n_feats = self.xtrain[0].shape[1], self.xtrain[0].shape[2]
-        print("shape ", n_samples, n_feats)
         #[[],[],[]]
         #add model layers
-        model.add(Conv1D(100, kernel_size=15, activation='relu', input_shape=(n_samples, n_feats)))
-        #model.add(LeakyReLU(alpha=0.05))
-        model.add(Conv1D(100, kernel_size=10, activation='relu'))
-        #model.add(LeakyReLU(alpha=0.05))
+        model.add(Conv1D(filter, kernel_size=kernel, input_shape=(n_samples, n_feats)))
+        model.add(activation)
+        model.add(Conv1D(filter, kernel_size=kernel))
+        model.add(activation)
         model.add(MaxPooling1D(pool_size=3))
         
-        model.add(Conv1D(32, kernel_size=10))
-        model.add(LeakyReLU(alpha=0.05))
+        model.add(Conv1D(int(filter/2), kernel_size=int(kernel / 2)))
+        model.add(activation)
         
-        model.add(Conv1D(32, kernel_size=10))
-        model.add(LeakyReLU(alpha=0.05))
+        model.add(Conv1D(int(filter/2), kernel_size=int(kernel / 2)))
+        model.add(activation)
         #model.add(GlobalAveragePooling1D())
         model.add(MaxPooling1D(pool_size=3))
         
@@ -66,28 +68,43 @@ class createCNN():
 
         model.add(Flatten())
         model.add(Dense(50))
-        model.add(LeakyReLU(alpha=0.5))
+        model.add(activation)
         model.add(Dense(2, activation='softmax'))
 
         #optimzer 
-        nesterov = Nadam(lr=0.001)
-        model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+        model.compile(optimizer=optimize, loss='categorical_crossentropy', metrics=['accuracy'])
         print(model.summary())
         return model
 
 
     def run_model(self):
+        #cross fold data
         self.pre_process()
-        model = self.build_seq_model()
-        
-        for i in range(len(self.xtrain)):
-            model.fit(self.xtrain[i], self.ytrain[i], epochs=10)
-            #validation_data=(self.xtest[i], self.ytest[i])
-            _, accuracy = model.evaluate(self.xtest[i], self.ytest[i])
-            print("acc ", accuracy)
+        #get hyper parameters
+        alpha, filters, kernel, optimizers = self.hypertune_params()
+
+        #run every possible combination
+        for a in alpha:
+            for f in filters:
+                for k in kernel:
+                    for o in optimizers:
+                        print("kernel ", k)
+                        model = self.build_seq_model(alpha = a, filter = int(f), kernel = int(k), optimize = o)
+                        
+                        for i in range(len(self.xtrain)):
+                            model.fit(self.xtrain[i], self.ytrain[i], epochs=3)
+                            #validation_data=(self.xtest[i], self.ytest[i])
+                            _, accuracy = model.evaluate(self.xtest[i], self.ytest[i])
+                            #if accuracy is greater than 80 percent write configuration to file
+                            print("acc ", accuracy)
+                            if accuracy > .80:
+                                with open("cnn_accuracy.txt", 'a+') as text:
+                                    line = str(accuracy) + " Config alpha " + str(a) + " Filters " + str(f) + " Kernel " + str(k) + " optimizer " + str(optimizers.__class__)
+                                    text.write(line)
+
         
     
-    def signal_data(self, x, y, timestep=120):
+    def seq_signal_data(self, x, y, timestep=120):
         xinputs = []
         youtputs = []
         signal = []
@@ -135,3 +152,37 @@ class createCNN():
         print("x ", self.xsignal[1])
         print("xshape ", self.xsignal.shape)
         self.ysignal = np.array(youtputs)
+
+
+
+    def hypertune_params(self):
+        #alpha values
+        alpha = np.linspace(0.01, .09, num=9)
+        print("alpha ", alpha)
+
+        #filters
+        Filters = np.linspace(20, 150, num=30, dtype=int)
+        print("Filters ", Filters)
+
+        #size of kernels
+        Kernel_size = np.linspace(2, 40, num=38, dtype=int)
+        print("Kernel ", Kernel_size)
+
+        #learning rate
+        learning_rate = np.linspace(.001, .010, num=10)
+
+        #optimizer
+        optimizers = [SGD(), RMSprop(), Adagrad(), Adadelta(), Adamax(), Nadam()]
+        for i in range(len(learning_rate)):
+            optimizers.append(SGD(lr=learning_rate[i]))
+            optimizers.append(RMSprop(lr=learning_rate[i]))
+            optimizers.append(Adagrad(lr=learning_rate[i]))
+            optimizers.append(Adamax(lr=learning_rate[i]))
+            optimizers.append(Nadam(lr=learning_rate[i]))
+
+        return alpha, Filters, Kernel_size, optimizers
+
+
+
+c = createCNN(2, 3, 3)
+c.hypertune_params()
