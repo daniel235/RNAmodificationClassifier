@@ -84,23 +84,23 @@ class createCNN():
         alpha, filters, kernel, optimizers = self.hypertune_params()
 
         #run every possible combination
-        for a in alpha:
-            for f in filters:
-                for k in kernel:
-                    for o in optimizers:
-                        print("kernel ", k)
-                        model = self.build_seq_model(alpha = a, filter = int(f), kernel = int(k), optimize = o)
-                        
-                        for i in range(len(self.xtrain)):
-                            model.fit(self.xtrain[i], self.ytrain[i], epochs=3)
-                            #validation_data=(self.xtest[i], self.ytest[i])
-                            _, accuracy = model.evaluate(self.xtest[i], self.ytest[i])
-                            #if accuracy is greater than 80 percent write configuration to file
-                            print("acc ", accuracy)
-                            if accuracy > .80:
-                                with open("cnn_accuracy.txt", 'a+') as text:
-                                    line = str(accuracy) + " Config alpha " + str(a) + " Filters " + str(f) + " Kernel " + str(k) + " optimizer " + str(optimizers.__class__)
-                                    text.write(line)
+        
+        for f in filters:
+            for k in kernel:
+                for o in optimizers:
+                    print("kernel ", k)
+                    model = self.build_seq_model(filter = int(f), kernel = int(k), optimize = o)
+                    
+                    for i in range(len(self.xtrain)):
+                        model.fit(self.xtrain[i], self.ytrain[i], epochs=3)
+                        #validation_data=(self.xtest[i], self.ytest[i])
+                        _, accuracy = model.evaluate(self.xtest[i], self.ytest[i])
+                        #if accuracy is greater than 80 percent write configuration to file
+                        print("acc ", accuracy)
+                        if accuracy > .80:
+                            with open("cnn_accuracy.txt", 'a+') as text:
+                                line = str(accuracy) + " Config alpha " + str(0.5) + " Filters " + str(f) + " Kernel " + str(k) + " optimizer " + str(optimizers.__class__)
+                                text.write(line)
 
         
     
@@ -157,7 +157,7 @@ class createCNN():
 
     def hypertune_params(self):
         #alpha values
-        alpha = np.linspace(0.01, .09, num=9)
+        alpha = np.linspace(0.01, .09, num=3)
         print("alpha ", alpha)
 
         #filters
