@@ -1,5 +1,5 @@
 from keras.models import Sequential
-from keras.layers import Dense, Conv1D, Conv2D, Flatten, Dropout, MaxPooling1D, LeakyReLU
+from keras.layers import Dense, Conv1D, Conv2D, Flatten, Dropout, MaxPooling1D, LeakyReLU, GlobalAveragePooling1D
 from keras.utils.np_utils import to_categorical
 from keras.optimizers import adam, Nadam
 import numpy as np
@@ -13,7 +13,7 @@ import ml.crossFold as cfold
 
 '''
 
-
+#todo pad data
 class createCNN():
     def __init__(self, x, y, nsplit):
         self.X = x
@@ -31,8 +31,7 @@ class createCNN():
         #self.ysignal = to_categorical(self.ysignal)
 
         #cross fold validation
-        self.xtrain, self.ytrain, self.xtest, self.ytest = cfold.splitData(self.n, self.xsignal, self.ysignal)
-        print("shape ", np.array(self.xtrain[0]).shape)
+        self.xtrain, self.ytrain, self.xtest, self.ytest = cfold.splitData(self.n, self.X, self.Y)
         
         for i in range(len(self.xtrain)):
             self.xtrain[i] = np.expand_dims(self.xtrain[i], axis=2)
@@ -49,21 +48,30 @@ class createCNN():
         print("shape ", n_samples, n_feats)
         #[[],[],[]]
         #add model layers
-        model.add(Conv1D(64, kernel_size=2, input_shape=(n_samples, n_feats)))
-        model.add(LeakyReLU(alpha=0.05))
-        model.add(Conv1D(32, kernel_size=2))
-        model.add(LeakyReLU(alpha=0.05))
-        model.add(Dropout(0.5))
-        model.add(MaxPooling1D(pool_size=10))
+        model.add(Conv1D(100, kernel_size=15, activation='relu', input_shape=(n_samples, n_feats)))
+        #model.add(LeakyReLU(alpha=0.05))
+        model.add(Conv1D(100, kernel_size=10, activation='relu'))
+        #model.add(LeakyReLU(alpha=0.05))
+        model.add(MaxPooling1D(pool_size=3))
         
+        model.add(Conv1D(32, kernel_size=5))
+        model.add(LeakyReLU(alpha=0.05))
+        
+        model.add(Conv1D(32, kernel_size=3))
+        model.add(LeakyReLU(alpha=0.05))
+        #model.add(GlobalAveragePooling1D())
+        model.add(MaxPooling1D(pool_size=3))
+        
+        model.add(Dropout(0.5))
+
         model.add(Flatten())
         model.add(Dense(50))
-        model.add(LeakyReLU(alpha=0.3))
+        model.add(LeakyReLU(alpha=0.5))
         model.add(Dense(2, activation='softmax'))
 
         #optimzer 
         nesterov = Nadam(lr=0.001)
-        model.compile(optimizer=nesterov, loss='categorical_crossentropy', metrics=['accuracy'])
+        model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
         print(model.summary())
         return model
 
@@ -73,7 +81,7 @@ class createCNN():
         model = self.build_seq_model()
         
         for i in range(len(self.xtrain)):
-            model.fit(self.xtrain[i], self.ytrain[i], epochs=5)
+            model.fit(self.xtrain[i], self.ytrain[i], epochs=10)
             #validation_data=(self.xtest[i], self.ytest[i])
             _, accuracy = model.evaluate(self.xtest[i], self.ytest[i])
             print("acc ", accuracy)

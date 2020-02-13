@@ -12,6 +12,7 @@ sys.path.insert(3, "./testing/")
 import ml.svm as svm
 import ml.knn as knn
 import ml.cnn as cnn
+import signalExtractor as signal
 import scripts.complete as complete
 import testing.learningCurve as lcurve
 
@@ -140,6 +141,11 @@ X = np.array(Xval)
 Y = np.array(Yval)
 print(len(X), len(Y))
 
+###############   Get Signal Data #############
+
+#get padded signal data
+x = signal.signal_data(allKmerData, Yval)
+
 
 ##################   Call SVM   #######################
 '''
@@ -162,8 +168,7 @@ lcurve.createLearningCurve(kneighbors.knn, X, Y, name="knn")
 '''
 ##################   Call CNN   #######################
 
-model = cnn.createCNN(X, Y, 3)
-model.signal_data(allKmerData, Yval, timestep=80)
+model = cnn.createCNN(x, Y, 3)
 model.run_model()
 
 
