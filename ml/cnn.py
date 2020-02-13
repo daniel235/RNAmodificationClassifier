@@ -54,15 +54,15 @@ class createCNN():
         #model.add(LeakyReLU(alpha=0.05))
         model.add(MaxPooling1D(pool_size=3))
         
-        model.add(Conv1D(32, kernel_size=5))
+        model.add(Conv1D(32, kernel_size=10))
         model.add(LeakyReLU(alpha=0.05))
         
-        model.add(Conv1D(32, kernel_size=3))
+        model.add(Conv1D(32, kernel_size=10))
         model.add(LeakyReLU(alpha=0.05))
         #model.add(GlobalAveragePooling1D())
         model.add(MaxPooling1D(pool_size=3))
         
-        model.add(Dropout(0.5))
+        model.add(Dropout(0.3))
 
         model.add(Flatten())
         model.add(Dense(50))

@@ -9,12 +9,14 @@ import pseudoExtractor as ps
 sys.path.insert(1, "./ml/")
 sys.path.insert(2, "./scripts/")
 sys.path.insert(3, "./testing/")
+sys.path.insert(4, "/stats/")
 import ml.svm as svm
 import ml.knn as knn
 import ml.cnn as cnn
 import signalExtractor as signal
 import scripts.complete as complete
 import testing.learningCurve as lcurve
+import stats.stats as stats
 
 
 #start pseudoExtractor 
@@ -129,12 +131,7 @@ for i in range(len(pseudoKmerData)):
     #Xval.append([kmerData[i][0], mean(pseudoKmerData[i][1:]), median(pseudoKmerData[i][1:]), max(pseudoKmerData[i][1:]), min(pseudoKmerData[i][1:]), np.std(pseudoKmerData[i][1:])])
     Yval.append([1])
 
-'''
-#insert one hot Feature
-for i in range(len(Xval)):
-    for j in range(len(X[i])):
-        Xval[i].append(X[i][j])
-'''
+
 
 #randomize indexes
 X = np.array(Xval)
@@ -144,8 +141,10 @@ print(len(X), len(Y))
 ###############   Get Signal Data #############
 
 #get padded signal data
-x = signal.signal_data(allKmerData, Yval)
+x, y = signal.signal_data(allKmerData, Yval)
 
+#get density plot of signal data
+#stats.get_signal_distribution(allKmerData, Y)
 
 ##################   Call SVM   #######################
 '''
@@ -168,7 +167,7 @@ lcurve.createLearningCurve(kneighbors.knn, X, Y, name="knn")
 '''
 ##################   Call CNN   #######################
 
-model = cnn.createCNN(x, Y, 3)
+model = cnn.createCNN(x, y, 3)
 model.run_model()
 
 
