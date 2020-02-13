@@ -4,7 +4,7 @@ import tkinter, tkinter.filedialog
 import os
 import platform
 import h5py
-from ont_fast5_api.fast5_interface import get_fast5_file
+
 
 '''
     extract psuedouridine locations and use dataframe for loss function

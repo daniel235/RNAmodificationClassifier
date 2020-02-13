@@ -91,6 +91,7 @@ print("size of ", len(kmerData))
 total = 364 + len(pseudoHela)
 #indexes = np.random.choice(total, total, replace=False)
 
+
 #adding kmer 
 for i in range(len(kmerData)):
     X.append(kmerData[i][0])
@@ -99,18 +100,6 @@ for i in range(len(kmerData)):
 for i in range(len(pseudoKmerData)):
     X.append(pseudoKmerData[i][0])
 
-
-le = preprocessing.LabelEncoder()
-le.fit(X)
-print(le.classes_)
-X = le.transform(X)
-X = X.reshape(-1, 1)
-
-#onehot encode
-enc = OneHotEncoder(handle_unknown='ignore', n_values=350)
-enc.fit(X)
-onehots = enc.transform(X).toarray()
-X = onehots
 
 allKmerData = []
 
