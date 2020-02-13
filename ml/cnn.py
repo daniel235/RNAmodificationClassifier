@@ -73,7 +73,7 @@ class createCNN():
 
         #optimzer 
         model.compile(optimizer=optimize, loss='categorical_crossentropy', metrics=['accuracy'])
-        print(model.summary())
+        print("Filter ", filter, " kernel ", kernel, " activation", activator, " optimizer ", optimize)
         return model
 
 
@@ -81,17 +81,18 @@ class createCNN():
         #cross fold data
         self.pre_process()
         #get hyper parameters
-        alpha, filters, kernel, optimizers, activation = self.hypertune_params()
+        alpha, filters, kernel, optimizers, activation, progress = self.hypertune_params()
+        percent = 0
 
         #run every possible combination
-        
         for f in filters:
             for k in kernel:
                 for a in activation:
                     for o in optimizers:
                         print("kernel ", k)
                         model = self.build_seq_model(filter = int(f), kernel = int(k), optimize = o, activator=a)
-                        
+                        percent += 1
+                        print("Percent ", float(percent / progress))
                         for i in range(len(self.xtrain)):
                             model.fit(self.xtrain[i], self.ytrain[i], epochs=3)
                             #validation_data=(self.xtest[i], self.ytest[i])
@@ -100,7 +101,7 @@ class createCNN():
                             print("acc ", accuracy)
                             if accuracy > .80:
                                 with open("cnn_accuracy.txt", 'a+') as text:
-                                    line = str(accuracy) + " Config alpha " + str(0.5) + " Filters " + str(f) + " Kernel " + str(k) + " optimizer " + str(optimizers.__class__)
+                                    line = str(accuracy) + " Config alpha " + str(0.5) + " Filters " + str(f) + " Kernel " + str(k) + " optimizer " + str(optimizers.__class__) + "\n"
                                     text.write(line)
 
         
@@ -167,6 +168,7 @@ class createCNN():
 
         #size of kernels
         Kernel_size = np.linspace(2, 40, num=38, dtype=int)
+        
         print("Kernel ", Kernel_size)
 
         #learning rate
@@ -178,15 +180,16 @@ class createCNN():
             optimizers.append(SGD(lr=learning_rate[i]))
             optimizers.append(RMSprop(lr=learning_rate[i]))
             optimizers.append(Adagrad(lr=learning_rate[i]))
+            optimizers.append(Adadelta(lr=learning_rate[i]))
             optimizers.append(Adamax(lr=learning_rate[i]))
             optimizers.append(Nadam(lr=learning_rate[i]))
 
         #activation
         #activations = [relu(), elu(), selu(), tanh(), sigmoid(), hard_sigmoid(), linear()]
-        activations = ['relu', 'elu', 'selu', 'tanh', 'sigmoid', 'hard_sigmoid', 'linear']
-        return alpha, Filters, Kernel_size, optimizers, activations
+        activations = ['elu', 'selu', 'tanh', 'sigmoid', 'relu', 'hard_sigmoid', 'linear']
+
+        progress = 30 * 38 * 10 * 6 * 7 * 10
+
+        return alpha, Filters, Kernel_size, optimizers, activations, progress
 
 
-
-c = createCNN(2, 3, 3)
-c.hypertune_params()
