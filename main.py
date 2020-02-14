@@ -136,17 +136,17 @@ x, y = signal.signal_data(allKmerData, Yval)
 #stats.get_signal_distribution(allKmerData, Y)
 
 ##################   Call SVM   #######################
-'''
+
 model = svm.createSVM()
 estimator = model.pipelineSVM()
-#model.runSVM(X, Y, 3)
+#model.runSVM(x, y, 3)
 
+y = np.array(y)
+y = y.reshape((len(x), ))
 
-Y = np.array(Y)
-Y = Y.reshape((len(X), ))
-lcurve.createLearningCurve(estimator, np.array(X), Y, name="svm_LinearSVC")
-lcurve.createLearningCurve(model.clf, np.array(X), Y, name="SVC")
-'''
+lcurve.createLearningCurve(estimator, np.array(x), y, name="svm_LinearSVC")
+lcurve.createLearningCurve(model.clf, np.array(x), y, name="SVC")
+
 ##################   Call KNN   #######################
 '''
 kneighbors = knn.createKNN()
@@ -155,10 +155,11 @@ kneighbors = knn.createKNN()
 lcurve.createLearningCurve(kneighbors.knn, X, Y, name="knn")
 '''
 ##################   Call CNN   #######################
-
+'''
 model = cnn.createCNN(x, y, 3)
 model.run_model()
-
+#model.single_run(f=92, a='linear', k=20)
+'''
 
 #call learning curve
 '''

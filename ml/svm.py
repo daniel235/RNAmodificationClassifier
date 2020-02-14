@@ -51,6 +51,7 @@ class createSVM():
                 f.write("\n")
                 
                 #write poly svm accuracies
+                '''
                 self.pipelineSVM(self.trainX[i], self.trainY[i], Cval=10, max=10000000)
                 self.polysvm.fit(self.trainX[i], self.trainY[i])
                 predictions = self.polysvm.predict(self.testX[i])
@@ -59,7 +60,7 @@ class createSVM():
                 #write accuracies
                 polyLine = "pipeline accuracy: " + str(accuracy_score(self.testY[i], predictions)) + "\n"
                 f.write(polyLine)
-                
+                '''
 
         #save model
         fname = "./results/svm"

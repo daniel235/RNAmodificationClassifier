@@ -73,7 +73,7 @@ class createCNN():
 
         #optimzer 
         model.compile(optimizer=optimize, loss='categorical_crossentropy', metrics=['accuracy'])
-        print("Filter ", filter, " kernel ", kernel, " activation", activator, " optimizer ", optimize)
+        print("Filter ", filter, " kernel ", kernel, " activation ", activator, " optimizer ", optimize)
         return model
 
 
@@ -85,10 +85,10 @@ class createCNN():
         percent = 0
 
         #run every possible combination
-        for f in filters:
-            for k in kernel:
-                for a in activation:
-                    for o in optimizers:
+        for a in activation:
+            for o in optimizers:
+                for k in kernel:
+                    for f in filters:
                         print("kernel ", k)
                         model = self.build_seq_model(filter = int(f), kernel = int(k), optimize = o, activator=a)
                         percent += 1
@@ -172,10 +172,11 @@ class createCNN():
         print("Kernel ", Kernel_size)
 
         #learning rate
-        learning_rate = np.linspace(.001, .010, num=10)
+        learning_rate = np.linspace(.001, .010, num=5)
 
         #optimizer
         optimizers = [SGD(), RMSprop(), Adagrad(), Adadelta(), Adamax(), Nadam()]
+        '''
         for i in range(len(learning_rate)):
             optimizers.append(SGD(lr=learning_rate[i]))
             optimizers.append(RMSprop(lr=learning_rate[i]))
@@ -183,7 +184,7 @@ class createCNN():
             optimizers.append(Adadelta(lr=learning_rate[i]))
             optimizers.append(Adamax(lr=learning_rate[i]))
             optimizers.append(Nadam(lr=learning_rate[i]))
-
+        '''
         #activation
         #activations = [relu(), elu(), selu(), tanh(), sigmoid(), hard_sigmoid(), linear()]
         activations = ['elu', 'selu', 'tanh', 'sigmoid', 'relu', 'hard_sigmoid', 'linear']
@@ -193,3 +194,17 @@ class createCNN():
         return alpha, Filters, Kernel_size, optimizers, activations, progress
 
 
+    def single_run(self, f=75, a='sigmoid', k=15, optimizers=SGD(lr=0.01)):
+        self.pre_process()
+        model = self.build_seq_model(filter=f, kernel=k, activator=a, optimize=SGD(lr=0.01))
+
+        for i in range(len(self.xtrain)):
+            model.fit(self.xtrain[i], self.ytrain[i], epochs=3)
+            #validation_data=(self.xtest[i], self.ytest[i])
+            _, accuracy = model.evaluate(self.xtest[i], self.ytest[i])
+            #if accuracy is greater than 80 percent write configuration to file
+            print("acc ", accuracy)
+            if accuracy > .80:
+                with open("cnn_accuracy.txt", 'a+') as text:
+                    line = str(accuracy) + " Config alpha " + str(0.5) + " Filters " + str(f) + " Kernel " + str(k) + " optimizer " + str(optimizers.__class__) + "\n"
+                    text.write(line)
