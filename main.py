@@ -171,13 +171,13 @@ def getSvmData():
 #stats.get_signal_distribution(allKmerData, Y)
 
 ##################   Call SVM   #######################
-'''
+
 x, y = getSvmData()
 x, y = signal.signal_data(x, y)
 model = svm.createSVM()
 #estimator = model.pipelineSVM()
 model.runSVM(x, y, 3)
-
+'''
 
 y = np.array(y)
 y = y.reshape((len(x), ))
