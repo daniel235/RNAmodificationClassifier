@@ -103,7 +103,7 @@ print(len(X), len(Y))
 
 def getKnnData():
     #get 2000 signal instances from controls
-    index = np.random.choice(len(controlHela), 3000, replace=False)
+    index = np.random.choice(len(controlHela), len(pseudoHela), replace=False)
     kmerData = totalControlKmerData[index]
     knnDatax = []
     knnDatay = []
@@ -172,6 +172,7 @@ def getSvmData():
 
 ##################   Call SVM   #######################
 
+'''
 x, y = getSvmData()
 x, y = signal.signal_data(x, y)
 indexes = np.random.choice(len(x), len(x), replace=False)
@@ -193,16 +194,18 @@ lcurve.createLearningCurve(model.clf, x, y, name="SVC")
 '''
 x, y = getKnnData()
 x, y = signal.signal_data(x, y)
-#reshape data for knn
+indexes = np.random.choice(len(x), len(x), replace=False)
+x = np.array(x)
 y = np.array(y)
-y = y.reshape((len(x), ))
+x = x[indexes]
+y = y[indexes]
 kneighbors = knn.createKNN()
 kneighbors.runKNN(x, y, 3)
 
-lcurve.createLearningCurve(kneighbors.knn, X, Y, name="knn")
+#lcurve.createLearningCurve(kneighbors.knn, x, y, name="knn")
 
 ##################   Call CNN   #######################
-'''
+
 '''
 x, y = getCnnData()
 x, y = signal.signal_data(x, y)

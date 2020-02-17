@@ -5,7 +5,7 @@ from datetime import date
 
 class createKNN():
     def __init__(self):
-        self.knn = KNeighborsClassifier()
+        self.knn = KNeighborsClassifier(algorithm='brute')
         self.X = None
         self.Y = None
         self.trainX = []
