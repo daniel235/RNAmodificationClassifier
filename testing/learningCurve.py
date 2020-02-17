@@ -29,7 +29,7 @@ def createLearningCurve(estimator, x, y, cv=None, name=""):
     plots.plot(train_sizes, train_scores_mean, 'o-', color="r", label="Training score")
     #plot test
     plots.plot(train_sizes, test_scores_mean, 'o-', color="g", label="Cross validation score")
-    fname = name + '_learning_curve.png'
+    fname = "./results/" + name + '_learning_curve.png'
     plt.savefig(fname)
 
     plots.legend(loc="best")

@@ -1,8 +1,9 @@
 from keras.models import Sequential
+from keras import callbacks
 from keras.layers import Dense, Conv1D, Conv2D, Flatten, Dropout, MaxPooling1D, LeakyReLU, GlobalAveragePooling1D, ELU
 from keras.activations import elu, selu, tanh, sigmoid, hard_sigmoid, linear, relu
 from keras.utils.np_utils import to_categorical
-from keras.optimizers import adam, Nadam, SGD, RMSprop, Adagrad, Adadelta, Adamax 
+from keras.optimizers import adam, Nadam, SGD, RMSprop, Adagrad, Adadelta, Adamax
 import numpy as np
 import sys
 
@@ -53,6 +54,7 @@ class createCNN():
         
 
     def build_seq_model(self, alpha = 0.5, filter = 100, kernel=15, activator='relu', optimize='adam'):
+        tensor_callback = callbacks.TensorBoard(log_dir="./logs/fit/tensorboard")
         model = Sequential()
         n_samples, n_feats = self.xtrain[0].shape[0], self.xtrain[0].shape[1]
         #[[],[],[]]
@@ -65,13 +67,14 @@ class createCNN():
         
         model.add(Conv1D(int(filter/2), kernel_size=int(kernel / 2), activation=activator))
         #model.add(LeakyReLU(alpha=0.5))
-        
+        '''
         model.add(Conv1D(int(filter/2), kernel_size=int(kernel / 2), activation=activator))
         #model.add(LeakyReLU(alpha=0.5))
         #model.add(GlobalAveragePooling1D())
+        '''
         model.add(MaxPooling1D(pool_size=3))
         
-        model.add(Dropout(0.5))
+        #model.add(Dropout(0.5))
 
         model.add(Flatten())
         model.add(Dense(50, activation=activator))
@@ -202,19 +205,20 @@ class createCNN():
         return alpha, Filters, Kernel_size, optimizers, activations, progress
 
 
-    def single_run(self, f=75, a='sigmoid', k=15, optimizers=Nadam(lr=0.01)):
+    def single_run(self, f=75, a='sigmoid', k=15, optimizers=adam(lr=0.1)):
         self.pre_process()
         model = self.build_seq_model(filter=f, kernel=k, activator=a, optimize=optimizers)
 
         for i in range(len(self.xtrain)):
-            model.fit(self.xtrain[i], self.ytrain[i], epochs=3)
+            tensor_callback = callbacks.TensorBoard(log_dir="./ml/logs/fit/tensorboard")
+            model.fit(self.xtrain[i], self.ytrain[i], batch_size=64, epochs=5, callbacks=[tensor_callback])
             #validation_data=(self.xtest[i], self.ytest[i])
             _, accuracy = model.evaluate(self.xtest[i], self.ytest[i])
             #if accuracy is greater than 80 percent write configuration to file
             print("acc ", accuracy)
             stats.signal_length_score(len(self.xtrain[i][0]), accuracy, f, k)
 
-            if accuracy > .80:
+            if accuracy > .76:
                 with open("cnn_accuracy.txt", 'a+') as text:
                     line = str(accuracy) + " Config alpha " + str(0.5) + " Filters " + str(f) + " Kernel " + str(k) + " optimizer " + str(optimizers.__class__) + "\n"
                     text.write(line)

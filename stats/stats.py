@@ -31,8 +31,8 @@ def get_signal_distribution(x, y):
 
 def signal_length_score(length, score, filters, kernel):
     #hash length to bin
-    mod = int(length / 30)
-    with open("./results/binStats.py", 'a+') as f:
+    mod = int(length / 20)
+    with open("./results/binStats.txt", 'a+') as f:
         line = str(score) + " bin " + str(mod) + " " + str(filters) + " " + str(kernel) + "\n"
         f.write(line)
 

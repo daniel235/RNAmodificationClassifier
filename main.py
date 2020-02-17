@@ -174,19 +174,23 @@ def getSvmData():
 
 x, y = getSvmData()
 x, y = signal.signal_data(x, y)
+indexes = np.random.choice(len(x), len(x), replace=False)
+x = np.array(x)
+y = np.array(y)
+x = x[indexes]
+y = y[indexes]
 model = svm.createSVM()
 #estimator = model.pipelineSVM()
-model.runSVM(x, y, 3)
-'''
+#model.runSVM(x, y, 3)
 
-y = np.array(y)
-y = y.reshape((len(x), ))
+#y = np.array(y)
+#y = y.reshape((len(x), ))
 
-lcurve.createLearningCurve(estimator, np.array(x), y, name="svm_LinearSVC")
-lcurve.createLearningCurve(model.clf, np.array(x), y, name="SVC")
+#lcurve.createLearningCurve(estimator, np.array(x), y, name="svm_LinearSVC")
+lcurve.createLearningCurve(model.clf, x, y, name="SVC")
 
 ##################   Call KNN   #######################
-
+'''
 x, y = getKnnData()
 x, y = signal.signal_data(x, y)
 #reshape data for knn
@@ -199,15 +203,16 @@ lcurve.createLearningCurve(kneighbors.knn, X, Y, name="knn")
 
 ##################   Call CNN   #######################
 '''
+'''
 x, y = getCnnData()
 x, y = signal.signal_data(x, y)
 model = cnn.createCNN(x, y, 3)
 #model.run_model()
-model.single_run(f=40, a=LeakyReLU(), k=15)
+model.single_run(f=60, a='selu', k=10)
 
 
 #call learning curve
-'''
+
 model.pre_process()
 estimator = model.build_seq_model()
 lcurve.createLearningCurve(estimator, model.X, model.Y)
