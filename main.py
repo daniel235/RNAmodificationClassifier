@@ -172,7 +172,7 @@ def getSvmData():
 
 ##################   Call SVM   #######################
 
-
+'''
 x, y = getSvmData()
 x, y = signal.signal_data(x, y)
 indexes = np.random.choice(len(x), len(x), replace=False)
@@ -183,7 +183,7 @@ y = y[indexes]
 model = svm.createSVM()
 #estimator = model.pipelineSVM()
 model.runSVM(x, y, 3)
-'''
+
 #y = np.array(y)
 #y = y.reshape((len(x), ))
 
@@ -206,16 +206,16 @@ kneighbors.runKNN(x, y, 3)
 
 ##################   Call CNN   #######################
 
-
+'''
 x, y = getCnnData()
 x, y = signal.signal_data(x, y)
 model = cnn.createCNN(x, y, 3)
 #model.run_model()
 model.single_run(f=60, a='selu', k=10)
-
+lcurve.createLearningCurve(model, x, y, keras=True, name="CNN")
 
 #call learning curve
-
+'''
 model.pre_process()
 estimator = model.build_seq_model()
 lcurve.createLearningCurve(estimator, model.X, model.Y)
