@@ -27,3 +27,16 @@ def get_signal_distribution(x, y):
     plt.savefig('hist_signal_distribution.png')
     plt.show()
     #plt.gca().set(title='Frequency Histogram', ylabel='Frequency')
+
+
+def signal_length_score(length, score, filters, kernel):
+    #hash length to bin
+    mod = int(length / 30)
+    with open("./results/binStats.py", 'a+') as f:
+        line = str(score) + " bin " + str(mod) + " " + str(filters) + " " + str(kernel) + "\n"
+        f.write(line)
+
+    
+
+        
+        

@@ -18,7 +18,7 @@ class createSVM():
         Class takes optional kernel
     '''
     def __init__(self, kernelType=None):
-        self.clf = svm.SVC(kernel='poly', verbose=1)
+        self.clf = svm.SVC(kernel='poly')
         self.polysvm = None
         self.X = None
         self.Y = None

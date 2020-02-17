@@ -1,5 +1,6 @@
 from sklearn.neighbors import KNeighborsClassifier
 import ml.crossFold
+import numpy as np
 from datetime import date
 
 class createKNN():
@@ -14,14 +15,19 @@ class createKNN():
         self.accuracy = []
 
 
-    def runKNN(self, nsplit, x, y):
+    def runKNN(self, x, y, nsplit):
         self.X = x
         self.Y = y
         #cross fold
         self.trainX, self.trainY, self.testX, self.testY = ml.crossFold.splitData(nsplit, x, y)
-        for i in range(nsplit):    
+        for i in range(nsplit):   
+            self.trainY[i] = np.array(self.trainY[i]).reshape((len(self.trainX[i], )))
+            print(self.trainY[i].shape)
             self.knn.fit(self.trainX[i], self.trainY[i])
-            self.accuracy.append(self.knn.score(self.testX[i], self.testY[i]))
+            #todo even test size
+            testx, testoutput = ml.crossFold.getEvenTestData(self.testX[i], self.testY[i])
+            print("len of test ", len(testx), " ", len(testoutput))
+            self.accuracy.append(self.knn.score(testx, testoutput))
             print("accuracy ", self.accuracy[i])
 
         #save scores

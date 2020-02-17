@@ -9,6 +9,8 @@ import sys
 
 import crossFold as cfold
 
+sys.path.insert(1, "../stats/")
+import stats.stats as stats
 '''
     CNN has different input type 
     Each base in kmer is used separately as input 
@@ -36,10 +38,15 @@ class createCNN():
         #cross fold validation
         self.xtrain, self.ytrain, self.xtest, self.ytest = cfold.splitData(self.n, self.X, self.Y)
         
+
         for i in range(len(self.xtrain)):
-            self.xtrain[i] = np.expand_dims(self.xtrain[i], axis=2)
-            self.xtest[i] = np.array(self.xtest[i])
-            self.xtest[i] = np.expand_dims(self.xtest[i], axis=2)
+            #self.xtest[i], self.ytest[i] = cfold.getEvenTestData(self.xtest[i], self.ytest[i])
+            #self.xtest[i] = np.array(self.xtest[i])
+            #self.xtrain[i] = np.expand_dims(self.xtrain[i], axis=2)
+            #self.xtest[i] = np.expand_dims(self.xtest[i], axis=2)
+            #reshape x data
+            self.xtrain[i] = self.xtrain[i].reshape((self.xtrain[i].shape[0], self.xtrain[i].shape[1], 1))
+            self.xtest[i] = self.xtest[i].reshape((self.xtest[i].shape[0], self.xtest[i].shape[1], 1))
             #convert to one hot
             self.ytrain[i] = to_categorical(self.ytrain[i])
             self.ytest[i] = to_categorical(self.ytest[i])
@@ -47,24 +54,24 @@ class createCNN():
 
     def build_seq_model(self, alpha = 0.5, filter = 100, kernel=15, activator='relu', optimize='adam'):
         model = Sequential()
-        n_samples, n_feats = self.xtrain[0].shape[1], self.xtrain[0].shape[2]
+        n_samples, n_feats = self.xtrain[0].shape[0], self.xtrain[0].shape[1]
         #[[],[],[]]
         #add model layers
-        model.add(Conv1D(filter, kernel_size=kernel, input_shape=(n_samples, n_feats), activation=activator))
+        model.add(Conv1D(filter, kernel_size=kernel, input_shape=(n_feats, 1), activation=activator))
         #model.add(LeakyReLU(alpha=0.5))
         model.add(Conv1D(filter, kernel_size=kernel, activation=activator))
         #model.add(LeakyReLU(alpha=0.5))
         model.add(MaxPooling1D(pool_size=3))
         
-        model.add(Conv1D(int(filter/2), kernel_size=int(kernel / 2)))
+        model.add(Conv1D(int(filter/2), kernel_size=int(kernel / 2), activation=activator))
         #model.add(LeakyReLU(alpha=0.5))
         
-        model.add(Conv1D(int(filter/2), kernel_size=int(kernel / 2)))
+        model.add(Conv1D(int(filter/2), kernel_size=int(kernel / 2), activation=activator))
         #model.add(LeakyReLU(alpha=0.5))
         #model.add(GlobalAveragePooling1D())
         model.add(MaxPooling1D(pool_size=3))
         
-        model.add(Dropout(0.3))
+        model.add(Dropout(0.5))
 
         model.add(Flatten())
         model.add(Dense(50, activation=activator))
@@ -99,6 +106,7 @@ class createCNN():
                             _, accuracy = model.evaluate(self.xtest[i], self.ytest[i])
                             #if accuracy is greater than 80 percent write configuration to file
                             print("acc ", accuracy)
+    
                             if accuracy > .80:
                                 with open("cnn_accuracy.txt", 'a+') as text:
                                     line = str(accuracy) + " Config alpha " + str(0.5) + " Filters " + str(f) + " Kernel " + str(k) + " optimizer " + str(optimizers.__class__) + "\n"
@@ -194,9 +202,9 @@ class createCNN():
         return alpha, Filters, Kernel_size, optimizers, activations, progress
 
 
-    def single_run(self, f=75, a='sigmoid', k=15, optimizers=SGD(lr=0.01)):
+    def single_run(self, f=75, a='sigmoid', k=15, optimizers=Nadam(lr=0.01)):
         self.pre_process()
-        model = self.build_seq_model(filter=f, kernel=k, activator=a, optimize=SGD(lr=0.01))
+        model = self.build_seq_model(filter=f, kernel=k, activator=a, optimize=optimizers)
 
         for i in range(len(self.xtrain)):
             model.fit(self.xtrain[i], self.ytrain[i], epochs=3)
@@ -204,6 +212,8 @@ class createCNN():
             _, accuracy = model.evaluate(self.xtest[i], self.ytest[i])
             #if accuracy is greater than 80 percent write configuration to file
             print("acc ", accuracy)
+            stats.signal_length_score(len(self.xtrain[i][0]), accuracy, f, k)
+
             if accuracy > .80:
                 with open("cnn_accuracy.txt", 'a+') as text:
                     line = str(accuracy) + " Config alpha " + str(0.5) + " Filters " + str(f) + " Kernel " + str(k) + " optimizer " + str(optimizers.__class__) + "\n"

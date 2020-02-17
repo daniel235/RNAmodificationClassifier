@@ -2,19 +2,18 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn import preprocessing
 import pandas as pd
 from statistics import mean, median
+from keras.layers import LeakyReLU
 import numpy as np
 import sys
 import pseudoExtractor as ps
 
 sys.path.insert(1, "./ml/")
-sys.path.insert(2, "./scripts/")
 sys.path.insert(3, "./testing/")
 sys.path.insert(4, "/stats/")
 import ml.svm as svm
 import ml.knn as knn
 import ml.cnn as cnn
 import signalExtractor as signal
-import scripts.complete as complete
 import testing.learningCurve as lcurve
 import stats.stats as stats
 
@@ -27,12 +26,10 @@ drp = [0, 2]
 controlHela = controlHela.drop(drp, axis=1)
 pseudoHela = pseudoHela.drop(drp, axis=1)
 
-print(controlHela.iloc[0,1])
 
-
+################### Extract data ###########################
 kmerData = []
-#!cut data to 500
-#for i in range(len(controlHela)):
+
 for i in range(len(controlHela)):
     kmer = controlHela.iloc[i, 0]
     kmerData.append([kmer])
@@ -77,6 +74,8 @@ for i in range(len(pseudoHela)):
         else:
             sig += values[j]
 
+#############################################################
+
 X = []
 Xval = []
 Y = []
@@ -86,79 +85,125 @@ Yval = []
 prevIndexes = np.random.choice(len(controlHela), 364, replace=False)
 
 #set length to 300(random choices)
+totalControlKmerData = np.array(kmerData)
 kmerData = np.array(kmerData)[prevIndexes]
 print("size of ", len(kmerData))
 total = 364 + len(pseudoHela)
 #indexes = np.random.choice(total, total, replace=False)
 
-
-#adding kmer 
-for i in range(len(kmerData)):
-    X.append(kmerData[i][0])
-
-
-for i in range(len(pseudoKmerData)):
-    X.append(pseudoKmerData[i][0])
-
-
 allKmerData = []
-
-for i in range(len(kmerData)):
-    #signal cnn input
-    allKmerData.append(kmerData[i][1:])
-    #svm input
-    Xval.append([mean(kmerData[i][1:]), median(kmerData[i][1:]), max(kmerData[i][1:]), min(kmerData[i][1:]), np.std(kmerData[i][1:])])
-    #cnn input
-    #Xval.append([kmerData[i][0], mean(kmerData[i][1:]), median(kmerData[i][1:]), max(kmerData[i][1:]), min(kmerData[i][1:]), np.std(kmerData[i][1:])])
-    Yval.append([0])
-
-
-for i in range(len(pseudoKmerData)):
-    #signal cnn input
-    allKmerData.append(pseudoKmerData[i][1:])
-    Xval.append([mean(pseudoKmerData[i][1:]), median(pseudoKmerData[i][1:]), max(pseudoKmerData[i][1:]), min(pseudoKmerData[i][1:]), np.std(pseudoKmerData[i][1:])])
-    #Xval.append([kmerData[i][0], mean(pseudoKmerData[i][1:]), median(pseudoKmerData[i][1:]), max(pseudoKmerData[i][1:]), min(pseudoKmerData[i][1:]), np.std(pseudoKmerData[i][1:])])
-    Yval.append([1])
-
-
 
 #randomize indexes
 X = np.array(Xval)
 Y = np.array(Yval)
 print(len(X), len(Y))
 
+
+################# Data inputs for classifiers  ########################
+
+def getKnnData():
+    #get 2000 signal instances from controls
+    index = np.random.choice(len(controlHela), 3000, replace=False)
+    kmerData = totalControlKmerData[index]
+    knnDatax = []
+    knnDatay = []
+    for i in range(len(kmerData)):
+        #signal input
+        knnDatax.append(kmerData[i][1:])
+        knnDatay.append([0])
+
+
+    for i in range(len(pseudoKmerData)):
+        #signal input
+        knnDatax.append(pseudoKmerData[i][1:])
+        knnDatay.append([1])
+
+    return knnDatax, knnDatay
+
+
+def getCnnData():
+    index = np.random.choice(len(controlHela), len(pseudoHela), replace=False)
+    kmerData = totalControlKmerData[index]
+    CnnDatax = []
+    CnnDatay = []
+    for i in range(len(kmerData)):
+        #signal input
+        CnnDatax.append(kmerData[i][1:])
+        CnnDatay.append([0])
+
+
+    for i in range(len(pseudoKmerData)):
+        #signal input
+        CnnDatax.append(pseudoKmerData[i][1:])
+        CnnDatay.append([1])
+
+    return CnnDatax, CnnDatay
+
+
+def getSvmData():
+    index = np.random.choice(len(controlHela), len(pseudoHela), replace=False)
+    kmerData = totalControlKmerData[index]
+    svmDatax = []
+    svmDatay = []
+
+    for i in range(len(kmerData)):
+        #signal input
+        svmDatax.append(kmerData[i][1:])
+        svmDatay.append([0])
+
+
+    for i in range(len(pseudoKmerData)):
+        #signal input
+        svmDatax.append(pseudoKmerData[i][1:])
+        svmDatay.append([1])
+
+    return svmDatax, svmDatay
+
+##################################################################
+
+
 ###############   Get Signal Data #############
 
 #get padded signal data
-x, y = signal.signal_data(allKmerData, Yval)
+#x, y = signal.signal_data(allKmerData, Yval)
 
 #get density plot of signal data
 #stats.get_signal_distribution(allKmerData, Y)
 
 ##################   Call SVM   #######################
 '''
+x, y = getSvmData()
+x, y = signal.signal_data(x, y)
 model = svm.createSVM()
-estimator = model.pipelineSVM()
-#model.runSVM(x, y, 3)
+#estimator = model.pipelineSVM()
+model.runSVM(x, y, 3)
+
 
 y = np.array(y)
 y = y.reshape((len(x), ))
 
 lcurve.createLearningCurve(estimator, np.array(x), y, name="svm_LinearSVC")
 lcurve.createLearningCurve(model.clf, np.array(x), y, name="SVC")
-'''
+
 ##################   Call KNN   #######################
-'''
+
+x, y = getKnnData()
+x, y = signal.signal_data(x, y)
+#reshape data for knn
+y = np.array(y)
+y = y.reshape((len(x), ))
 kneighbors = knn.createKNN()
-#kneighbors.runKNN(3, X, Y)
+kneighbors.runKNN(x, y, 3)
 
 lcurve.createLearningCurve(kneighbors.knn, X, Y, name="knn")
-'''
-##################   Call CNN   #######################
 
+##################   Call CNN   #######################
+'''
+x, y = getCnnData()
+x, y = signal.signal_data(x, y)
 model = cnn.createCNN(x, y, 3)
-model.run_model()
-#model.single_run(f=92, a='linear', k=20)
+#model.run_model()
+model.single_run(f=40, a=LeakyReLU(), k=15)
 
 
 #call learning curve
@@ -167,3 +212,4 @@ model.pre_process()
 estimator = model.build_seq_model()
 lcurve.createLearningCurve(estimator, model.X, model.Y)
 '''
+

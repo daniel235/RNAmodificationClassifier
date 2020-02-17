@@ -5,7 +5,9 @@ import numpy as np
 def splitData(splits, X, Y):
         #returned data structs
         X = np.array(X)
-        Y = np.array(Y)
+        if type(Y).__module__ != 'numpy':
+            Y = np.array(Y)
+
         trainX = []
         trainY = []
         testX = []
@@ -20,3 +22,42 @@ def splitData(splits, X, Y):
             testY.append(Y[test_index])
 
         return trainX, trainY, testX, testY
+
+
+def getEvenTestData(testx, test_output, limit=0):
+    print(testx)
+    print(test_output)
+    
+    final_test_data = []
+    final_test_y = []
+
+    #get count of pseudo in test data
+    for i in range(len(testx)):
+        if test_output[i] == 1:
+            limit += 1
+
+    print("limit ", limit)
+
+
+    test_size_control = limit
+    test_size_pseudo = limit
+
+    for i in range(len(testx)):
+        if test_size_control > 0:
+            if test_output[i] == 0:
+                test_size_control -= 1
+                final_test_data.append(testx[i])
+                final_test_y.append(test_output[i])
+
+
+        if test_size_pseudo > 0:
+            if test_output[i] == 1:
+                test_size_pseudo -= 1
+                final_test_data.append(testx[i])
+                final_test_y.append(test_output[i])
+
+        if test_size_control == 0 and test_size_pseudo == 0:
+            return final_test_data, final_test_y
+
+    return final_test_data, final_test_y
+        
