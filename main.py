@@ -13,6 +13,7 @@ sys.path.insert(4, "/stats/")
 import ml.svm as svm
 import ml.knn as knn
 import ml.cnn as cnn
+import ml.logistic as logistic
 import signalExtractor as signal
 import testing.learningCurve as lcurve
 import stats.stats as stats
@@ -205,13 +206,13 @@ kneighbors.runKNN(x, y, 3)
 #lcurve.createLearningCurve(kneighbors.knn, x, y, name="knn")
 
 ##################   Call CNN   #######################
-
 '''
+
 x, y = getCnnData()
 x, y = signal.signal_data(x, y)
 model = cnn.createCNN(x, y, 3)
 #model.run_model()
-model.single_run(f=60, a='selu', k=10)
+model = model.single_run(f=80, a='relu', k=20)
 lcurve.createLearningCurve(model, x, y, keras=True, name="CNN")
 
 #call learning curve
@@ -219,5 +220,12 @@ lcurve.createLearningCurve(model, x, y, keras=True, name="CNN")
 model.pre_process()
 estimator = model.build_seq_model()
 lcurve.createLearningCurve(estimator, model.X, model.Y)
-'''
 
+
+#################  Call Logistic Regression  #############
+
+x, y = getSvmData()
+x, y = signal.signal_data(x, y)
+l = logistic.logRegression()
+l.fit(x, y)
+'''

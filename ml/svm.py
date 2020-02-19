@@ -76,7 +76,6 @@ class createSVM():
         kf = KFold(n_splits=splits, shuffle=True)
         kf.get_n_splits(self.X)
         for train_index, test_index in kf.split(self.X):
-            #print indexes
             self.trainX.append(self.X[train_index])
             self.testX.append(self.X[test_index])
             self.trainY.append(self.Y[train_index])

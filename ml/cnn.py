@@ -59,13 +59,13 @@ class createCNN():
         n_samples, n_feats = self.xtrain[0].shape[0], self.xtrain[0].shape[1]
         #[[],[],[]]
         #add model layers
-        model.add(Conv1D(filter, kernel_size=kernel, input_shape=(n_feats, 1), activation=activator))
+        model.add(Conv1D(100, kernel_size=15, input_shape=(n_feats, 1), activation=activator))
         #model.add(LeakyReLU(alpha=0.5))
-        model.add(Conv1D(filter, kernel_size=kernel, activation=activator))
+        model.add(Conv1D(100, kernel_size=15, activation=activator))
         #model.add(LeakyReLU(alpha=0.5))
         model.add(MaxPooling1D(pool_size=3))
         
-        model.add(Conv1D(int(filter/2), kernel_size=int(kernel / 2), activation=activator))
+        model.add(Conv1D(32, kernel_size=5, activation=activator))
         #model.add(LeakyReLU(alpha=0.5))
         '''
         model.add(Conv1D(int(filter/2), kernel_size=int(kernel / 2), activation=activator))
@@ -74,10 +74,10 @@ class createCNN():
         '''
         model.add(MaxPooling1D(pool_size=3))
         
-        #model.add(Dropout(0.5))
+        model.add(Dropout(0.5))
 
         model.add(Flatten())
-        model.add(Dense(50, activation=activator))
+        #model.add(Dense(50, activation=activator))
         #model.add(LeakyReLU(alpha=0.5))
         model.add(Dense(2, activation='softmax'))
 
@@ -211,7 +211,7 @@ class createCNN():
 
         for i in range(len(self.xtrain)):
             tensor_callback = callbacks.TensorBoard(log_dir="./ml/logs/fit/tensorboard")
-            model.fit(self.xtrain[i], self.ytrain[i], batch_size=64, epochs=5, callbacks=[tensor_callback])
+            hist = model.fit(self.xtrain[i], self.ytrain[i], batch_size=64, epochs=5, callbacks=[tensor_callback], validation_split=0.2)
             #validation_data=(self.xtest[i], self.ytest[i])
             _, accuracy = model.evaluate(self.xtest[i], self.ytest[i])
             #if accuracy is greater than 80 percent write configuration to file
@@ -222,3 +222,5 @@ class createCNN():
                 with open("cnn_accuracy.txt", 'a+') as text:
                     line = str(accuracy) + " Config alpha " + str(0.5) + " Filters " + str(f) + " Kernel " + str(k) + " optimizer " + str(optimizers.__class__) + "\n"
                     text.write(line)
+
+        return hist

@@ -5,6 +5,16 @@ import numpy as np
 
 #use full data no cross fold
 def createLearningCurve(estimator, x, y, cv=None, name="", keras=False):
+    #if the estimator is the keras model
+    if keras == True:
+        #model already ran
+        plt.plot(estimator.history['acc'])
+        plt.plot(estimator.history['val_acc'])
+        fname = "./results/" + name + '_learning_curve.png'
+        plt.savefig(fname)
+        return
+
+
     train_sizes, train_scores, test_scores = learning_curve(estimator, x, y, cv=cv, train_sizes=np.linspace(.1, 1.0, 5))
 
     #create plots
@@ -34,10 +44,4 @@ def createLearningCurve(estimator, x, y, cv=None, name="", keras=False):
 
     plots.legend(loc="best")
 
-    #if the estimator is the keras model
-    if keras:
-        #model already ran
-        plt.plot(estimator.history['acc'])
-        plt.plot(estimator.history['val_acc'])
-        fname = "./results/" + name + '_learning_curve.png'
-        plt.savefig(fname)
+    
