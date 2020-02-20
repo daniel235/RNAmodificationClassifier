@@ -1,5 +1,9 @@
 import seaborn as sns
 import matplotlib.pyplot as plt
+from scipy.fft import fftshift
+from scipy import signal
+from statistics import mean
+
 
 def get_signal_distribution(x, y):
     control_signal_len = []
@@ -13,7 +17,6 @@ def get_signal_distribution(x, y):
 
     #sns.distplot(signal_len, hist=False, kde=True, kde_kws={"shade": True, "linewidth": 3})
     #plt.show()
-    print("got to density")
     sns.kdeplot(control_signal_len, shade=True, label='control')
     sns.kdeplot(pseudo_signal_len, shade=True, label='pseudo')
     plt.legend()
@@ -21,7 +24,6 @@ def get_signal_distribution(x, y):
     plt.show()
     plt.close()
 
-    print("got to hist")
     plt.hist(control_signal_len, bins=40, density=True, color='blue')
     plt.hist(pseudo_signal_len, bins=40, density=True, color='green')
     plt.savefig('hist_signal_distribution.png')
@@ -37,6 +39,25 @@ def signal_length_score(length, score, filters, kernel):
         f.write(line)
 
     
+def signal_amplitude_mean(x, y):
+    control_mean = []
+    pseudo_mean = []
+    for i in range(len(x)):
+        if y[i][0] == 0:
+            control_mean.append(mean(x[i]))
+
+        else:
+            pseudo_mean.append(mean(x[i]))
+
+    #plot distribution
+    sns.kdeplot(control_mean, shade=True, label='control')
+    sns.kdeplot(pseudo_mean, shade=True, label='pseudo')
+    plt.legend()
+    plt.savefig('signal_mean_distribution.png')
+    plt.show()
+    plt.close()
+    
+
 
         
         

@@ -212,7 +212,7 @@ x, y = getCnnData()
 x, y = signal.signal_data(x, y)
 model = cnn.createCNN(x, y, 3)
 #model.run_model()
-model = model.single_run(f=80, a='relu', k=20)
+model = model.single_run(f=80, a='tanh', k=20)
 lcurve.createLearningCurve(model, x, y, keras=True, name="CNN")
 
 #call learning curve
@@ -228,4 +228,9 @@ x, y = getSvmData()
 x, y = signal.signal_data(x, y)
 l = logistic.logRegression()
 l.fit(x, y)
+
+
+x, y = getSvmData()
+#x, y = signal.signal_data(x, y)
+stats.signal_amplitude_mean(x, y)
 '''
