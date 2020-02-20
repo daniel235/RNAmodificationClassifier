@@ -5,7 +5,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.ensemble import ExtraTreesClassifier
-from sklearn.model_selection import KFold
+from sklearn.model_selection import KFold, GridSearchCV
 from sklearn.metrics import confusion_matrix
 import pickle
 import matplotlib.pyplot as plt
@@ -18,7 +18,7 @@ class createSVM():
         Class takes optional kernel
     '''
     def __init__(self, kernelType=None):
-        self.clf = svm.SVC(kernel='poly', C=2.0)
+        self.clf = svm.SVC(kernel='poly', C=3.0)
         self.polysvm = None
         self.X = None
         self.Y = None
@@ -68,8 +68,16 @@ class createSVM():
             pickle.dump(self.clf, f)
 
 
-    def tuneParameters(self):
-        maxCVal = 10
+    def tuneParameters(self, x, y):
+        #parameters
+        tuned_parameters = [{'kernel': ['poly'], 'C': [1, 3, 5, 200], 'gamma': [1e-3, 1e-4], 'degree': [3, 4, 5, 6]}]
+        #use grid search
+        clf = GridSearchCV(svm.SVC(), tuned_parameters)
+        clf.fit(x, y)
+        #write best params to file
+        with open("./results/svm_best_results.txt", 'a+') as f:
+            line = str(clf.best_params_)
+            f.write(line)
 
 
     def splitData(self, splits):

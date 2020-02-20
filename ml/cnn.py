@@ -53,29 +53,29 @@ class createCNN():
             self.ytest[i] = to_categorical(self.ytest[i])
         
 
-    def build_seq_model(self, alpha = 0.5, filter = 100, kernel=15, activator='relu', optimize='adam'):
+    def build_seq_model(self, alpha = 0.5, filter = 100, kernel=15, activator='relu', optimize=Nadam(lr=0.02)):
         tensor_callback = callbacks.TensorBoard(log_dir="./logs/fit/tensorboard")
         model = Sequential()
         n_samples, n_feats = self.xtrain[0].shape[0], self.xtrain[0].shape[1]
         #hard code filters
-        filter_size = n_feats / 2
+        filter_size = int(n_feats / 2)
         #[[],[],[]]
         #add model layers
-        model.add(Conv1D(30, kernel_size=10, input_shape=(n_feats, 1), activation=activator))
+        model.add(Conv1D(filter_size, kernel_size=10, input_shape=(n_feats, 1), activation=activator))
         #model.add(LeakyReLU(alpha=0.5))
-        model.add(Conv1D(30, kernel_size=10, activation=activator))
+        model.add(Conv1D(filter_size, kernel_size=10, activation=activator))
         #model.add(LeakyReLU(alpha=0.5))
         model.add(MaxPooling1D(pool_size=3))
         
-        model.add(Conv1D(32, kernel_size=5, activation=activator))
+        model.add(Conv1D(int(filter_size / 2), kernel_size=3, activation=activator))
         #model.add(LeakyReLU(alpha=0.5))
-        
-        model.add(Conv1D(32, kernel_size=2))
+        '''
+        model.add(Conv1D(int(filter_size / 2), kernel_size=3))
         model.add(LeakyReLU(alpha=0.5))
         #model.add(GlobalAveragePooling1D())
         
         model.add(MaxPooling1D(pool_size=3))
-        
+        '''
         model.add(Dropout(0.5))
 
         model.add(Flatten())
@@ -116,58 +116,6 @@ class createCNN():
                                 with open("cnn_accuracy.txt", 'a+') as text:
                                     line = str(accuracy) + " Config alpha " + str(0.5) + " Filters " + str(f) + " Kernel " + str(k) + " optimizer " + str(optimizers.__class__) + "\n"
                                     text.write(line)
-
-        
-    
-    def seq_signal_data(self, x, y, timestep=120):
-        xinputs = []
-        youtputs = []
-        signal = []
-        currentCount = 0
-        currentY = 0
-        i = 0
-        while(i < len(x)):
-            #input raw signal data until signal array full
-            for j in range(timestep):
-                #if you run out of signal move to the next x line
-                if currentCount >= len(x[i]):
-                    i += 1
-                    currentCount = 0
-                    #if you run out of control samples 
-                    if(i < len(y)):
-                        #if next row is another y reset signal 
-                        if y[i] != currentY:
-                            currentY = y[i]
-                            #reset signal array 
-                            signal = []
-                            continue
-                    
-                    else:
-                        break
-
-                signal.append(x[i][currentCount])
-                currentCount += 1
-
-            #after 30 signals add to xinput
-            if len(signal) == timestep:
-                xinputs.append(np.array(signal))
-                youtputs.append(currentY)
-
-            signal = []
-
-        #remove last row
-        xinputs.pop()
-        #remove first row
-        xinputs.pop(0)
-        print(xinputs)
-        self.xsignal = np.array(xinputs)
-        #reshape
-        self.xsignal.reshape((self.xsignal.shape[0], timestep))
-        #remove first item
-        print("x ", self.xsignal[1])
-        print("xshape ", self.xsignal.shape)
-        self.ysignal = np.array(youtputs)
-
 
 
     def hypertune_params(self):
@@ -213,9 +161,18 @@ class createCNN():
 
         for i in range(len(self.xtrain)):
             tensor_callback = callbacks.TensorBoard(log_dir="./ml/logs/fit/tensorboard")
+            #shuffle data
+            rand_index = np.random.choice(len(self.ytrain[i]), len(self.ytrain[i]), replace=False)
+            test_rand_index = np.random.choice(len(self.ytest[i]), len(self.ytest[i]), replace=False)
+            
+            #shuffle data
+            self.xtrain[i] = self.xtrain[i][rand_index]
+            self.ytrain[i] = self.ytrain[i][rand_index]
+            self.xtest[i] = self.xtest[i][test_rand_index]
+            self.ytest[i] = self.ytest[i][test_rand_index]
             hist = model.fit(self.xtrain[i], self.ytrain[i], epochs=5, callbacks=[tensor_callback], validation_split=0.2)
             #validation_data=(self.xtest[i], self.ytest[i])
-            _, accuracy = model.evaluate(self.xtest[i], self.ytest[i])
+            _, accuracy = model.evaluate(self.xtest[i], self.ytest[i], verbose=1)
             #if accuracy is greater than 80 percent write configuration to file
             print("acc ", accuracy)
             stats.signal_length_score(len(self.xtrain[i][0]), accuracy, f, k)

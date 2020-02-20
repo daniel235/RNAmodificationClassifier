@@ -173,7 +173,7 @@ def getSvmData():
 
 ##################   Call SVM   #######################
 
-'''
+
 x, y = getSvmData()
 x, y = signal.signal_data(x, y)
 indexes = np.random.choice(len(x), len(x), replace=False)
@@ -183,14 +183,14 @@ x = x[indexes]
 y = y[indexes]
 model = svm.createSVM()
 #estimator = model.pipelineSVM()
-model.runSVM(x, y, 3)
-
+#model.runSVM(x, y, 2)
+model.tuneParameters(x, y)
 #y = np.array(y)
 #y = y.reshape((len(x), ))
 
 #lcurve.createLearningCurve(estimator, np.array(x), y, name="svm_LinearSVC")
 lcurve.createLearningCurve(model.clf, x, y, name="SVC")
-
+'''
 ##################   Call KNN   #######################
 
 x, y = getKnnData()
@@ -207,16 +207,16 @@ kneighbors.runKNN(x, y, 3)
 
 ##################   Call CNN   #######################
 '''
-
+'''
 x, y = getCnnData()
 x, y = signal.signal_data(x, y)
-model = cnn.createCNN(x, y, 3)
+model = cnn.createCNN(x, y, 2)
 #model.run_model()
-model = model.single_run(f=80, a='tanh', k=20)
+model = model.single_run(f=80, a='sigmoid', k=20)
 lcurve.createLearningCurve(model, x, y, keras=True, name="CNN")
 
 #call learning curve
-'''
+
 model.pre_process()
 estimator = model.build_seq_model()
 lcurve.createLearningCurve(estimator, model.X, model.Y)

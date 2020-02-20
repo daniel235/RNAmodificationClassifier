@@ -1,0 +1,1 @@
+0.7654320968031393 Config alpha 0.5 Filters 80 Kernel 20 optimizer <class 'keras.optimizers.Adam'>
