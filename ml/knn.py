@@ -30,6 +30,7 @@ class createKNN():
             self.accuracy.append(self.knn.score(testx, testoutput))
             print("accuracy ", self.accuracy[i])
 
+
         #save scores
         self.saveAccuracy(self.accuracy)
 

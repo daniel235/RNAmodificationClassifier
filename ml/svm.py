@@ -6,6 +6,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.model_selection import KFold, GridSearchCV
+
 from sklearn.metrics import confusion_matrix
 import pickle
 import matplotlib.pyplot as plt
@@ -18,7 +19,7 @@ class createSVM():
         Class takes optional kernel
     '''
     def __init__(self, kernelType=None):
-        self.clf = svm.SVC(kernel='poly', C=3.0)
+        self.clf = svm.SVC(kernel='poly', C=3.0, degree=4)
         self.polysvm = None
         self.X = None
         self.Y = None
@@ -78,6 +79,16 @@ class createSVM():
         with open("./results/svm_best_results.txt", 'a+') as f:
             line = str(clf.best_params_)
             f.write(line)
+
+
+    def test_accuracy(self, x, y):
+        #load svm
+        pfile = open("./results/svm", 'rb')
+        svmModel = pickle.load(pfile)
+        predictions = svmModel.predict(x)
+        print(accuracy_score(y, predictions))
+
+
 
 
     def splitData(self, splits):

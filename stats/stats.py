@@ -2,7 +2,7 @@ import seaborn as sns
 import matplotlib.pyplot as plt
 from scipy.fft import fftshift
 from scipy import signal
-from statistics import mean
+from statistics import mean, stdev
 
 
 def get_signal_distribution(x, y):
@@ -56,8 +56,26 @@ def signal_amplitude_mean(x, y):
     plt.savefig('signal_mean_distribution.png')
     plt.show()
     plt.close()
+
+
+def std_deviation_distribution(x, y):
+    control_deviation = []
+    pseudo_deviation = []
+    for i in range(len(x)):
+        if y[i][0] == 0:
+            control_deviation.append(stdev(x[i]))
+
+        else:
+            pseudo_deviation.append(stdev(x[i]))
     
 
+    #plot distribution
+    sns.kdeplot(control_deviation, shade=True, label='control')
+    sns.kdeplot(pseudo_deviation, shade=True, label='pseudo')
+    plt.legend()
+    plt.savefig('signal_deviation_distribution.png')
+    plt.show()
+    plt.close()
 
         
         

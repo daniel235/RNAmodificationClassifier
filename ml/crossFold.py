@@ -33,7 +33,7 @@ def getEvenTestData(testx, test_output, limit=0):
 
     #get count of pseudo in test data
     for i in range(len(testx)):
-        if test_output[i] == 1:
+        if test_output[i][0] == 1:
             limit += 1
 
     print("limit ", limit)
@@ -44,14 +44,14 @@ def getEvenTestData(testx, test_output, limit=0):
 
     for i in range(len(testx)):
         if test_size_control > 0:
-            if test_output[i] == 0:
+            if test_output[i][0] == 0:
                 test_size_control -= 1
                 final_test_data.append(testx[i])
                 final_test_y.append(test_output[i])
 
 
         if test_size_pseudo > 0:
-            if test_output[i] == 1:
+            if test_output[i][0] == 1:
                 test_size_pseudo -= 1
                 final_test_data.append(testx[i])
                 final_test_y.append(test_output[i])

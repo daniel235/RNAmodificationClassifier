@@ -14,6 +14,8 @@ import ml.svm as svm
 import ml.knn as knn
 import ml.cnn as cnn
 import ml.logistic as logistic
+import ml.fourier as fourier
+import ml.rnn as rnn
 import signalExtractor as signal
 import testing.learningCurve as lcurve
 import stats.stats as stats
@@ -104,7 +106,7 @@ print(len(X), len(Y))
 
 def getKnnData():
     #get 2000 signal instances from controls
-    index = np.random.choice(len(controlHela), len(pseudoHela), replace=False)
+    index = np.random.choice(len(controlHela), 40000, replace=False)
     kmerData = totalControlKmerData[index]
     knnDatax = []
     knnDatay = []
@@ -149,13 +151,24 @@ def getSvmData():
 
     for i in range(len(kmerData)):
         #signal input
-        svmDatax.append(kmerData[i][1:])
+        row = []
+        row.append(len(kmerData[i]) - 1)
+        for j in range(1, len(kmerData[i])):
+            row.append(kmerData[i][j])
+
+
+        svmDatax.append(row)
         svmDatay.append([0])
 
 
     for i in range(len(pseudoKmerData)):
         #signal input
-        svmDatax.append(pseudoKmerData[i][1:])
+        row = []
+        row.append(len(pseudoKmerData[i]) - 1)
+        for j in range(1, len(pseudoKmerData[i])):
+            row.append(pseudoKmerData[i][j])
+
+        svmDatax.append(row)
         svmDatay.append([1])
 
     return svmDatax, svmDatay
@@ -173,7 +186,7 @@ def getSvmData():
 
 ##################   Call SVM   #######################
 
-
+'''
 x, y = getSvmData()
 x, y = signal.signal_data(x, y)
 indexes = np.random.choice(len(x), len(x), replace=False)
@@ -184,14 +197,16 @@ y = y[indexes]
 model = svm.createSVM()
 #estimator = model.pipelineSVM()
 #model.runSVM(x, y, 2)
-model.tuneParameters(x, y)
+#model.tuneParameters(x, y)
+model.test_accuracy(x, y)
 #y = np.array(y)
 #y = y.reshape((len(x), ))
 
 #lcurve.createLearningCurve(estimator, np.array(x), y, name="svm_LinearSVC")
 lcurve.createLearningCurve(model.clf, x, y, name="SVC")
-'''
+
 ##################   Call KNN   #######################
+
 
 x, y = getKnnData()
 x, y = signal.signal_data(x, y)
@@ -206,13 +221,12 @@ kneighbors.runKNN(x, y, 3)
 #lcurve.createLearningCurve(kneighbors.knn, x, y, name="knn")
 
 ##################   Call CNN   #######################
-'''
-'''
-x, y = getCnnData()
+
+x, y = getSvmData()
 x, y = signal.signal_data(x, y)
 model = cnn.createCNN(x, y, 2)
 #model.run_model()
-model = model.single_run(f=80, a='sigmoid', k=20)
+model = model.single_run(f=80, a='relu', k=20)
 lcurve.createLearningCurve(model, x, y, keras=True, name="CNN")
 
 #call learning curve
@@ -232,5 +246,15 @@ l.fit(x, y)
 
 x, y = getSvmData()
 #x, y = signal.signal_data(x, y)
-stats.signal_amplitude_mean(x, y)
+stats.std_deviation_distribution(x, y)
 '''
+
+x, y = getCnnData()
+x, y = signal.signal_data(x, y)
+#fourier.read_signal(x, y)
+#rnet = rnn.createRNN()
+#rnet.createNet(x, y)
+lstmNet = rnn.createRNN(x, y)
+batch, batchy, test, test_out = lstmNet.createBatchData()
+model = lstmNet.runRecurrentNet(batch, batchy)
+#lstmNet.runLSTM(model)

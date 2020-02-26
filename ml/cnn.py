@@ -43,11 +43,11 @@ class createCNN():
         for i in range(len(self.xtrain)):
             #self.xtest[i], self.ytest[i] = cfold.getEvenTestData(self.xtest[i], self.ytest[i])
             #self.xtest[i] = np.array(self.xtest[i])
-            #self.xtrain[i] = np.expand_dims(self.xtrain[i], axis=2)
-            #self.xtest[i] = np.expand_dims(self.xtest[i], axis=2)
+            self.xtrain[i] = np.expand_dims(self.xtrain[i], axis=2)
+            self.xtest[i] = np.expand_dims(self.xtest[i], axis=2)
             #reshape x data
-            self.xtrain[i] = self.xtrain[i].reshape((self.xtrain[i].shape[0], self.xtrain[i].shape[1], 1))
-            self.xtest[i] = self.xtest[i].reshape((self.xtest[i].shape[0], self.xtest[i].shape[1], 1))
+            #self.xtrain[i] = self.xtrain[i].reshape((1, self.xtrain[i].shape[0], self.xtrain[i].shape[1]))
+            #self.xtest[i] = self.xtest[i].reshape((1, self.xtest[i].shape[0], self.xtest[i].shape[1]))
             #convert to one hot
             self.ytrain[i] = to_categorical(self.ytrain[i])
             self.ytest[i] = to_categorical(self.ytest[i])
@@ -56,14 +56,15 @@ class createCNN():
     def build_seq_model(self, alpha = 0.5, filter = 100, kernel=15, activator='relu', optimize=Nadam(lr=0.02)):
         tensor_callback = callbacks.TensorBoard(log_dir="./logs/fit/tensorboard")
         model = Sequential()
-        n_samples, n_feats = self.xtrain[0].shape[0], self.xtrain[0].shape[1]
+        n_samples, n_feats = self.xtrain[0].shape[1], self.xtrain[0].shape[2]
+        print(n_samples, n_feats)
         #hard code filters
         filter_size = int(n_feats / 2)
-        #[[],[],[]]
+    
         #add model layers
-        model.add(Conv1D(filter_size, kernel_size=10, input_shape=(n_feats, 1), activation=activator))
+        model.add(Conv1D(90, kernel_size=10, input_shape=(n_samples, n_feats), activation=activator))
         #model.add(LeakyReLU(alpha=0.5))
-        model.add(Conv1D(filter_size, kernel_size=10, activation=activator))
+        model.add(Conv1D(90, kernel_size=10, activation=activator))
         #model.add(LeakyReLU(alpha=0.5))
         model.add(MaxPooling1D(pool_size=3))
         
@@ -166,12 +167,14 @@ class createCNN():
             test_rand_index = np.random.choice(len(self.ytest[i]), len(self.ytest[i]), replace=False)
             
             #shuffle data
-            self.xtrain[i] = self.xtrain[i][rand_index]
-            self.ytrain[i] = self.ytrain[i][rand_index]
-            self.xtest[i] = self.xtest[i][test_rand_index]
-            self.ytest[i] = self.ytest[i][test_rand_index]
+            #self.xtrain[i] = self.xtrain[i][rand_index]
+            #self.ytrain[i] = self.ytrain[i][rand_index]
+            #self.xtest[i] = self.xtest[i][test_rand_index]
+            #self.ytest[i] = self.ytest[i][test_rand_index]
+            print("xtrain shape ", self.xtrain[i].shape)
             hist = model.fit(self.xtrain[i], self.ytrain[i], epochs=5, callbacks=[tensor_callback], validation_split=0.2)
             #validation_data=(self.xtest[i], self.ytest[i])
+            #self.xtest[i], self.ytest[i] = cfold.getEvenTestData(self.xtest[i], self.ytest[i])
             _, accuracy = model.evaluate(self.xtest[i], self.ytest[i], verbose=1)
             #if accuracy is greater than 80 percent write configuration to file
             print("acc ", accuracy)
