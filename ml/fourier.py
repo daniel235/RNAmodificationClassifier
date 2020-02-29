@@ -15,7 +15,6 @@ def read_signal(signal, output):
             if count <= 0:
                 control_flag = True
 
-
             sig = np.array(signal[i])
             print(sig)
             y = fft(sig)

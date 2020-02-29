@@ -25,9 +25,6 @@ def splitData(splits, X, Y):
 
 
 def getEvenTestData(testx, test_output, limit=0):
-    print(testx)
-    print(test_output)
-    
     final_test_data = []
     final_test_y = []
 

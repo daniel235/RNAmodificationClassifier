@@ -57,7 +57,7 @@ def signal_amplitude_mean(x, y):
     plt.show()
     plt.close()
 
-
+#get standard deviation of each signal 
 def std_deviation_distribution(x, y):
     control_deviation = []
     pseudo_deviation = []
