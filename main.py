@@ -223,12 +223,13 @@ kneighbors = knn.createKNN()
 lcurve.createLearningCurve(kneighbors.knn, x, y, name="knn")
 
 ##################   Call CNN   #######################
-
-x, y = getSvmData()
+'''
+x, y = getCnnData()
 x, y = signal.signal_data(x, y)
-model = cnn.createCNN(x, y, 2)
+model = cnn.createCNN(x, y, 3)
 #model.run_model()
 model = model.single_run(f=80, a='relu', k=20)
+'''
 lcurve.createLearningCurve(model, x, y, keras=True, name="CNN")
 
 #call learning curve
@@ -257,7 +258,7 @@ x, y = getSvmData()
 stats.std_deviation_distribution(x, y)
 stats.signal_amplitude_mean(x, y)
 
-'''
+
 x, y = getCnnData()
 x, y = signal.signal_data(x, y)
 #fourier.read_signal(x, y)
@@ -266,6 +267,8 @@ x, y = signal.signal_data(x, y)
 lstmNet = rnn.createRNN(x, y)
 batch, batchy, test, test_out = lstmNet.createBatchData()
 model = lstmNet.createLSTM()
-model = lstmNet.runRecurrentNet(batch, batchy)
+model = lstmNet.runRNN(batch, batchy)
+
 #lstmNet.runLSTM(model)
 #lstmNet.runLSTM(model)
+'''

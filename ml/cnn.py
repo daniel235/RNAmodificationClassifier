@@ -9,9 +9,12 @@ import sys
 
 
 import crossFold as cfold
+import ml.pelican_CNN as pelican
 
 sys.path.insert(1, "../stats/")
+sys.path.insert(1, "../testing/")
 import stats.stats as stats
+import testing.learningCurve as lc
 '''
     CNN has different input type 
     Each base in kmer is used separately as input 
@@ -43,8 +46,8 @@ class createCNN():
         for i in range(len(self.xtrain)):
             #self.xtest[i], self.ytest[i] = cfold.getEvenTestData(self.xtest[i], self.ytest[i])
             #self.xtest[i] = np.array(self.xtest[i])
-            self.xtrain[i] = np.expand_dims(self.xtrain[i], axis=2)
-            self.xtest[i] = np.expand_dims(self.xtest[i], axis=2)
+            #self.xtrain[i] = np.expand_dims(self.xtrain[i], axis=2)
+            #self.xtest[i] = np.expand_dims(self.xtest[i], axis=2)
             #reshape x data
             #self.xtrain[i] = self.xtrain[i].reshape((1, self.xtrain[i].shape[0], self.xtrain[i].shape[1]))
             #self.xtest[i] = self.xtest[i].reshape((1, self.xtest[i].shape[0], self.xtest[i].shape[1]))
@@ -156,8 +159,22 @@ class createCNN():
         return alpha, Filters, Kernel_size, optimizers, activations, progress
 
 
-    def single_run(self, f=75, a='sigmoid', k=15, optimizers=adam(lr=0.1)):
+    def single_run(self, f=75, a='sigmoid', k=15, optimizers=adam(lr=0.1), pelican_run=True):
         self.pre_process()
+        if pelican_run:
+            sc = []
+            for i in range(len(self.xtrain)):
+                #shuffle xtrain and xtest
+                idx = np.random.choice(len(self.xtrain[i]), len(self.xtrain[i]), replace=False)
+                t_idx = np.random.choice(len(self.xtest[i]), len(self.xtest[i]), replace=False)
+                self.xtrain[i], self.ytrain[i] = self.xtrain[i][idx], self.ytrain[i][idx]
+                self.xtest[i], self.ytest[i] = self.xtest[i][t_idx], self.ytest[i][t_idx]
+                sc = pelican.predictLabel(self.xtrain[i], 64, self.ytrain[i], self.xtest[i], self.ytest[i], score=sc)
+
+            #plot real learning curves
+            lc.createLearningCurve(None, None, None, None, name="Pelican", is_estimator=False, scores=sc)
+            return
+
         model = self.build_seq_model(filter=f, kernel=k, activator=a, optimize=optimizers)
 
         for i in range(len(self.xtrain)):

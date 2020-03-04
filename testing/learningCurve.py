@@ -4,7 +4,7 @@ import numpy as np
 
 
 #use full data no cross fold
-def createLearningCurve(estimator, x, y, cv=None, name="", keras=False):
+def createLearningCurve(estimator, x, y, cv=None, name="", keras=False, is_estimator=True, scores=None):
     #if the estimator is the keras model
     if keras == True:
         #model already ran
@@ -14,9 +14,16 @@ def createLearningCurve(estimator, x, y, cv=None, name="", keras=False):
         plt.savefig(fname)
         return
 
+    if is_estimator:
+        train_sizes, train_scores, test_scores = learning_curve(estimator, x, y, cv=cv, train_sizes=np.linspace(.1, 1.0, 5))
 
-    train_sizes, train_scores, test_scores = learning_curve(estimator, x, y, cv=cv, train_sizes=np.linspace(.1, 1.0, 5))
-
+    else:
+        #read in scores[x[kfolds], y[kfolds], testx[kfolds], test_y[kfolds]]
+        train_sizes = len(scores[0][0][-1])
+        sc = np.array(scores)
+        train_scores = sc[:][1]
+        test_scores = sc[:][3]
+        
     #create plots
     _, plots = plt.subplots(figsize=(20, 5))
 
