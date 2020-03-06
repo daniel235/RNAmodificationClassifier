@@ -11,7 +11,17 @@ import h5py
     extract signal for input data
 '''
 
-def get_file(read_mode=None):
+def get_file(read_mode=None, dev=None):
+    #in development
+    if dev == 1:
+        #control
+        file = open("./data/control_hela_PSU_signals_v5[7219].txt", 'r')
+        return file
+    elif dev == 2:
+        #modified
+        file = open("./data/post_epi_hela_PSU_signals_1mer[7207].txt")
+        return file
+
     if platform.system() == 'Windows':
         #select file
         root = tkinter.Tk()
@@ -71,10 +81,10 @@ def signal_reader(filename=None):
     return df
 
 def get_Hela():
-    helaFile = get_file()
+    helaFile = get_file(dev=1)
     dfControl = pd.read_csv(helaFile, sep=' ', header=None)
     print(dfControl)
-    helaFile = get_file()
+    helaFile = get_file(dev=2)
     dfModified = pd.read_csv(helaFile, sep=' ', header=None)
     print(dfModified)
     return dfControl, dfModified
