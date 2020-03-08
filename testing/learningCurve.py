@@ -19,11 +19,42 @@ def createLearningCurve(estimator, x, y, cv=None, name="", keras=False, is_estim
 
     else:
         #read in scores[x[kfolds], y[kfolds], testx[kfolds], test_y[kfolds]]
-        train_sizes = len(scores[0][0][-1])
-        sc = np.array(scores)
-        train_scores = sc[:][1]
-        test_scores = sc[:][3]
+        train_sizes = scores[0][0]
+        test_scores = []
+        train_scores = []
         
+        '''
+        for i in range(len(scores)):
+            train_scores.append(scores[i][1])
+            test_scores.append(scores[i][3])
+        '''
+        time_train = []
+        time_test = []
+        for i in range(len(scores)):
+            #rolls over all train scores of ith run
+            for j in range(len(scores[i][1])):
+                #create time array 
+                #add first time score
+                if i == 0:
+                    time_train.append([scores[i][1][j]])
+                else:
+                    train_scores[j].append(scores[i][1][j])
+                
+            
+            #for 1 to batchNum test scores
+            for j in range(len(scores[i][3])):
+                #add first time score
+                if i == 0:
+                    time_test.append([scores[i][3][j]])
+                else:
+                    test_scores[j].append(scores[i][3][j])
+
+            if i == 0:
+                #two arrays of batchNum arrays each
+                train_scores = time_train
+                test_scores = time_test
+        
+
     #create plots
     _, plots = plt.subplots(figsize=(20, 5))
 

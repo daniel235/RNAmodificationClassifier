@@ -3,6 +3,7 @@ import tensorflow as tf
 from keras.models import Sequential
 from keras.utils.np_utils import to_categorical
 from keras.layers import LSTM, Dense, Dropout, Input, Flatten
+import matplotlib.pyplot as plt
 import numpy as np
 import ml.crossFold as cfold
 
@@ -14,24 +15,19 @@ class createRNN():
         self.ytrain = None
         self.xtest = None
         self.ytest = None
-        self.xtrain, self.ytrain, self.xtest, self.ytest = cfold.splitData(3, x, y)
-
+        self.xtrain, self.ytrain, self.xtest, self.ytest = cfold.splitData(5, x, y)
+        
 
     def hyperTune(self):
         #function to auto tune network 
         pass
 
     #todo scale inputs
-    def runRecurrentNet(self, inputs, y_output):
+    def runRecurrentNet(self, inputs, y_output, xtest, ytest):
         tf.reset_default_graph()
         #each signal is a time step
         #n_input should be padded length
         #inputs = np.array(inputs)
-        
-        #unroll y output
-        currentY = []
-        for i in range(len(y_output)):
-            currentY.append(y_output[i])
 
         #y_output = np.array(currentY).reshape((y_output.shape[0] * y_output.shape[1], 2))
         
@@ -39,26 +35,26 @@ class createRNN():
         n_steps = inputs.shape[1]
         #only 1 feature
         n_features = 1
-        n_neurons = 30
+        n_neurons = 25
 
         #720 x 100
         #nsteps is number of samples(32) features(1)
         x = tf.placeholder(tf.float32, [None, n_steps, n_features], name="X_input")
-        y = tf.placeholder(tf.int32, [None])
+        y = tf.placeholder(tf.int32, [None, 2])
         #dynamic rnn
-        rnn_cell = tf.contrib.rnn.BasicRNNCell(num_units=n_neurons, name="rnn_cell_basic", activation=tf.nn.relu)
+        rnn_cell = tf.contrib.rnn.BasicRNNCell(num_units=n_neurons, name="rnn_cell_basic", activation=tf.nn.leaky_relu)
         lstm_cell = tf.contrib.rnn.LSTMCell(num_units=n_neurons, name="lstm_cell_basic")
         #uneven sequence length
-        #seq_length = tf.placeholder(tf.int32, [None])
+        seq_length = tf.placeholder(tf.int32, [None])
 
-        outputs, states = tf.nn.dynamic_rnn(rnn_cell, x, dtype=tf.float32)
-
+        outputs, states = tf.nn.dynamic_rnn(rnn_cell, x, dtype=tf.float32, sequence_length=seq_length)
+        #stat_outputs, stat_states = tf.nn.static_rnn(lstm_cell)
         #states = tf.reshape(states, [n_samples, None])
         logits = tf.layers.dense(states, 2)
         #outputs = tf.contrib.layers.flatten(outputs)
         #logits = tf.contrib.layers.fully_connected(outputs, 2)
         
-        cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(labels=y_output, logits=logits)
+        cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(labels=y, logits=logits)
         
         '''
         mask = tf.sign(tf.reduce_max(tf.abs(y_output), 2))
@@ -70,7 +66,8 @@ class createRNN():
         cost = tf.reduce_mean(cross_entropy)
 
         #optimize network
-        optimize = tf.train.AdamOptimizer()
+        #optimize = tf.train.AdamOptimizer()
+        optimize = tf.train.GradientDescentOptimizer(learning_rate=0.01)
         optOperation = optimize.minimize(cost)
         #correct = tf.nn.in_top_k(logits, y, 1)
         
@@ -79,28 +76,68 @@ class createRNN():
         #accuracy = tf.reduce_mean(tf.cast(correct, tf.float32))
         
         init = tf.global_variables_initializer()
-    
 
         with tf.Session() as sess:
             sess.run(init)
-            #sess.run(optOperation, feed_dict={x: inputs, y: y_output})
-            #prediction = sess.run(prediction, feed_dict={x: inputs, y: y_output})
-            #print(prediction)
-            #acc_train = accuracy.eval(feed_dict={x: inputs, y: y_output})
-            for epoch in range(100):
-                sess.run(optOperation, feed_dict={x: inputs})
+            #get variablesequence length 
+            train_seq_len = self.getSequenceLength(inputs)
+            test_seq_len = self.getSequenceLength(xtest)
+            
+            predictions = []
+            accuracies = []
+            accuracies_test = []
+            epochs = []
+            #train network
+            for epoch in range(600):
+                _, preds = sess.run((optOperation, prediction), feed_dict={x: inputs, y: y_output, seq_length: train_seq_len})
+                
+                accuracy = 0
+                #iterate through predictions
+                for num, pred in enumerate(preds):
+                    true_val = np.argmax(pred, axis=0)
+                    if y_output[int(num)][true_val] == 1.0:
+                        accuracy += 1
+                
+                epochs.append(epoch)
 
-            c = sess.run(prediction, feed_dict={x: inputs})
-            #print("prediction ", c)
-            accuracy = 0
-            for num, pred in enumerate(c):
-                print(num, pred, y_output[int(num)])
-                true_val = np.argmax(pred, axis=0)
-                if y_output[int(num)][true_val] == 1.0:
-                    accuracy += 1
+                accuracies.append(float(accuracy / len(y_output)))
+                #run test 
+                c = sess.run(prediction, feed_dict={x: xtest, y: ytest, seq_length: test_seq_len})
+                accuracy = 0
+                
+                #iterate through predictions
+                for num, pred in enumerate(c):
+                    true_val = np.argmax(pred, axis=0)
+                    if ytest[int(num)][true_val] == 1.0:
+                        accuracy += 1
 
-            accuracy = float(accuracy / len(y_output))
-            print(accuracy)
+                accuracies_test.append(float(accuracy / len(ytest)))
+           
+            #plot learning curves
+            plt.plot(epochs, accuracies, label="training")
+            plt.plot(epochs, accuracies_test, label="testing")
+            plt.legend()
+            plt.savefig("./results/RNNlc.png")
+            plt.show()
+            plt.close()
+
+
+    def prepareRNN(self, x, y):
+        #for i in range(len(x)):
+            #for batch in range(len(x[i])):
+                #self.runRecurrentNet(np.expand_dims(x[i][batch], axis=2), y[i][batch])
+        
+        for i in range(len(self.xtrain)):
+            idx = np.random.choice(len(self.xtrain[i]), len(self.xtrain[i]), replace=False)
+            self.xtrain[i] = self.xtrain[i][idx]
+            self.ytrain[i] = self.ytrain[i][idx]
+            idx = np.random.choice(len(self.xtest[i]), len(self.xtest[i]), replace=False)
+            self.xtest[i] = self.xtest[i][idx]
+            self.ytest[i] = self.ytest[i][idx]
+            #self.xtest[i], self.ytest[i] = cfold.getEvenTestData(self.xtest[i], self.ytest[i])
+            print("x ", len(self.xtest[i]), " y ", len(self.ytest[i]))
+            self.runRecurrentNet(np.expand_dims(self.xtrain[i], axis=2), to_categorical(self.ytrain[i]), np.expand_dims(self.xtest[i], axis=2), to_categorical(self.ytest[i]))
+
 
 
     #input batch size, time_steps, data dim
@@ -142,17 +179,7 @@ class createRNN():
             print("acc ", accuracy)
     
 
-    def runRNN(self, x, y):
-        #for i in range(len(x)):
-            #for batch in range(len(x[i])):
-                #self.runRecurrentNet(np.expand_dims(x[i][batch], axis=2), y[i][batch])
-        
-        for i in range(len(self.xtrain)):
-            idx = np.random.choice(len(self.xtrain[i]), len(self.xtrain[i]), replace=False)
-            self.xtrain[i] = self.xtrain[i][idx]
-            self.ytrain[i] = self.ytrain[i][idx]
-            self.runRecurrentNet(np.expand_dims(self.xtrain[i], axis=2), to_categorical(self.ytrain[i]))
-
+    
     #todo shuffle data
     def createBatchData(self):
         cfoldBatches = []
@@ -208,3 +235,55 @@ class createRNN():
 
 
         return cfoldBatches, cfoldY, testcfoldBatches, ctestfoldY
+
+
+    def createLearningCurve(self, c, y):
+        print("len of y ", len(y))
+        #create learning curve
+        break_points = np.linspace(0, len(c), 5, endpoint=False, dtype=int)[1:]
+        
+        lin_acc_x, lin_acc_y = [], []
+        accuracy = 0
+        currentPoint = 0
+        #iterate through predictions
+        for num, pred in enumerate(c):
+            true_val = np.argmax(pred, axis=0)
+            if y[int(num)][true_val] == 1.0:
+                accuracy += 1
+
+            #plot breakpoint
+            if currentPoint < len(break_points):
+                if num == break_points[currentPoint]:
+                    lin_acc_x.append(num)
+                    lin_acc_y.append(float(accuracy / num))
+                    currentPoint += 1
+
+        accuracy = float(accuracy / len(y))
+        lin_acc_x.append(len(y))
+        lin_acc_y.append(accuracy)
+        print(accuracy)
+        #plot learning curve
+        print("x ", lin_acc_x, " y ", lin_acc_y)
+        plt.plot(lin_acc_x, lin_acc_y, label="training")
+        plt.savefig("./results/rnnLC")
+        plt.show()
+        plt.close()
+
+
+    #get true sequence length of individual signals
+    def getSequenceLength(self, x):
+        seq_len = []
+        for i in range(len(x)):
+            count = 0
+            for j in range(len(x[i])):
+                if count == (len(x[i]) - 1):
+                    seq_len.append(count)
+                    break
+
+                if x[i][j] == 0:
+                    seq_len.append(count)
+                    break
+                else:
+                    count += 1
+
+        return seq_len

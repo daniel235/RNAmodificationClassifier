@@ -145,7 +145,7 @@ def getCnnData():
 
 
 def getSvmData():
-    index = np.random.choice(len(controlHela), 500, replace=False)
+    index = np.random.choice(len(controlHela), 1000, replace=False)
     kmerData = totalControlKmerData[index]
     svmDatax = []
     svmDatay = []
@@ -181,9 +181,10 @@ def getSvmData():
 
 #get padded signal data
 #x, y = signal.signal_data(allKmerData, Yval)
+#x, y = getCnnData()
 
 #get density plot of signal data
-#stats.get_signal_distribution(allKmerData, Y)
+#stats.get_signal_distribution(x, y)
 
 ##################   Call SVM   #######################
 
@@ -223,13 +224,13 @@ kneighbors = knn.createKNN()
 lcurve.createLearningCurve(kneighbors.knn, x, y, name="knn")
 
 ##################   Call CNN   #######################
-'''
+
 x, y = getCnnData()
 x, y = signal.signal_data(x, y)
-model = cnn.createCNN(x, y, 3)
+model = cnn.createCNN(x, y, 10)
 #model.run_model()
 model = model.single_run(f=80, a='relu', k=20)
-'''
+
 lcurve.createLearningCurve(model, x, y, keras=True, name="CNN")
 
 #call learning curve
@@ -250,11 +251,14 @@ x = x[indexes]
 y = y[indexes]
 l = logistic.logRegression()
 l.fit(x, y)
-#lcurve.createLearningCurve(l.reg, x, y, name="LogReg")
+lcurve.createLearningCurve(l.reg, x, y, name="LogReg")
 
-
-x, y = getSvmData()
+'''
+x, y = getCnnData()
 #x, y = signal.signal_data(x, y)
+#fourier.get_images(x, y)
+
+'''
 stats.std_deviation_distribution(x, y)
 stats.signal_amplitude_mean(x, y)
 
@@ -266,9 +270,8 @@ x, y = signal.signal_data(x, y)
 #rnet.createNet(x, y)
 lstmNet = rnn.createRNN(x, y)
 batch, batchy, test, test_out = lstmNet.createBatchData()
-model = lstmNet.createLSTM()
-model = lstmNet.runRNN(batch, batchy)
+model = lstmNet.prepareRNN(batch, batchy)
 
 #lstmNet.runLSTM(model)
-#lstmNet.runLSTM(model)
+
 '''

@@ -2,48 +2,52 @@ from scipy.fft import fft
 import matplotlib.pyplot as plt
 import numpy as np
 
-
-def read_signal(signal, output):
-    #convert signal to nd array
-    control_flag = False
-    pseudo_flag = False
-    count = 10
-    second_count = 10
+#get fourier transform of signal and save images
+def get_images(signal, output):
+    p_count = 0
+    c_count = 0
     for i in range(len(signal)):
-        if output[i][0] == 0 and control_flag == False:
-            count -= 1
-            if count <= 0:
-                control_flag = True
+        x_axis = np.linspace(0, len(signal[i]), num=len(signal[i]), dtype=int)
+        sig = np.array(signal[i])  
 
-            sig = np.array(signal[i])
-            print(sig)
-            y = fft(sig)
-            ax = plt.subplot()
-            plt.grid()
-            ax.plot(signal, y)
-            plt.plot(y)
-            plt.show()
+        #y = y_value_signal(sig)
+        y = np.exp(2j * np.pi * sig / len(sig))
+    
+        y = fft(y)
+        plt.grid()
+        plt.plot(x_axis, y)
+
+        #return image
+        if output[i][0] == 0:
+            c_count += 1
+            types = "control"
+            fname = "./data/images/" + types + str(c_count) + ".png"
+            plt.savefig(fname)
             plt.close()
-
-        elif output[i][0] == 1 and pseudo_flag == False:
-            second_count -= 1
-            if second_count <= 0:
-                pseudo_flag = True
-
-            sig = np.array(signal[i])
-            print(sig)
-            y = fft(sig)
-            plt.grid()
-            plt.plot(y)
-            plt.show()
+            
+        elif output[i][0] == 1:
+            p_count += 1
+            types ="pseudo"
+            fname = "./data/images/" + types + str(p_count) + ".png"
+            plt.savefig(fname)
             plt.close()
+        
 
 
 def y_value_signal(signal):
     #return y value of signal
     y = np.sin(50.0 * 2.0*np.pi*signal) + 0.5*np.sin(80.0 * 2.0*np.pi*signal)
     return y
-  
-    
 
-    
+
+
+  
+'''
+x = np.array([1,2,3,4,5,6,7,8,9,10])
+x2 = np.array([1,2,3,4,3,2,1,2,3,4])
+y_val = y_value_signal(x2)
+print(y_val)
+y_val = fft(y_val)
+plt.plot(x, y_val)
+plt.show()
+'''

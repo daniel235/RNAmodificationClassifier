@@ -6,16 +6,18 @@ def signal_data(x, y, timestep=120):
     paddedx = []
     paddedy = []
     #get longest sequence in data
-    '''for i in range(len(x)):
+    '''
+    for i in range(len(x)):
         if len(x[i]) > max and len(x[i]) < 200:
             max = len(x[i])
-'''
+    '''
     max = 200
     #pad all elements to max length
     for i in range(len(x)):
         if len(x[i]) > 200:
             x = x[:200]
-        else:
+
+        elif len(x[i]) < 200:
             #input raw signal data until signal array full
             for j in range(len(x[i]), max):
                 x[i].append(0)
@@ -26,8 +28,17 @@ def signal_data(x, y, timestep=120):
 
 
     paddedx = np.array(paddedx)
+    paddedy = np.array(paddedy)
     #reshape
     paddedx.reshape((paddedx.shape[0], max))
+    #shuffle
+    idx = np.random.choice(len(paddedx), len(paddedx), replace=False)
+    paddedx = paddedx[idx]
+    paddedy = paddedy[idx]
+    #shuffle again
+    idx = np.random.choice(len(paddedx), len(paddedx), replace=False)
+    paddedx = paddedx[idx]
+    paddedy = paddedy[idx]
     return paddedx, paddedy
 
 

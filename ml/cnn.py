@@ -203,3 +203,7 @@ class createCNN():
                     text.write(line)
 
         return hist
+
+
+    def ImageCNN(self):
+        pass

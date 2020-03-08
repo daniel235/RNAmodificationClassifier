@@ -12,7 +12,7 @@ from sklearn.metrics import accuracy_score, precision_score
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 
-def predictLabel(X, bt, y_output, xtest, ytest, train=True, score=scores):
+def predictLabel(X, bt, y_output, xtest, ytest, train=True, score=None):
 
     testX=X
     
@@ -136,7 +136,8 @@ def predictLabel(X, bt, y_output, xtest, ytest, train=True, score=scores):
             cost = tf.reduce_mean( tf.nn.softmax_cross_entropy_with_logits(logits=prediction,labels=y) )
         
         with tf.name_scope('OPtimizer'):
-            optimizer = tf.train.AdamOptimizer().minimize(cost)
+            #optimizer = tf.train.AdamOptimizer().minimize(cost)
+            optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001).minimize(cost)
     
         with tf.name_scope('Accuracy'):
         # # Accuracy
@@ -171,7 +172,7 @@ def predictLabel(X, bt, y_output, xtest, ytest, train=True, score=scores):
                 loss_list = []
                 lc_acc_train_x, lc_acc_train_y = [], []
                 lc_acc_test_x, lc_acc_test_y = [], []
-                for epoch in range(60):
+                for epoch in range(250):
                     for _ in range(len(batches)):
                         test_X, y_batch = batches[_][0], batches[_][1]
                         #train first
@@ -179,28 +180,27 @@ def predictLabel(X, bt, y_output, xtest, ytest, train=True, score=scores):
                         loss_list.append(loss)
                         #get test data
                         accuracy = acc.eval(feed_dict={x: test_X, y: y_batch.reshape(v_batch_size,2)})
-                        if epoch == 59:
-                            lc_acc_train_x.append(_ * v_batch_size)
-                            lc_acc_train_y.append(accuracy)
+                        lcc_acc_train_y.append(accuracy)
                         print("train ", accuracy)
                     
                     for _ in range(len(test_batches)):
                         test_X, y_batch = test_batches[_][0], test_batches[_][1]
                         accuracy = acc.eval(feed_dict={x: test_X, y: y_batch})
-                        if epoch == 59:
-                            lc_acc_test_x.append(_ * v_batch_size)
-                            lc_acc_test_y.append(accuracy)
-
-                    if epoch == 59:
-                        plt.plot(lc_acc_train_x, lc_acc_train_y, label="training")
-                        plt.plot(lc_acc_test_x, lc_acc_test_y, label="validation")
-                    
+                        
+                        
+                    lc_acc_test_x.append(epoch)
                     print("test acc ", accuracy)
+                    
 
+                plt.plot(lc_acc_train_x, lc_acc_train_y, label="training")
+                plt.plot(lc_acc_test_x, lc_acc_test_y, label="validation")
+                    
+
+                '''
                 plt.legend()
                 plt.savefig("./results/PelicanLC.png")
                 plt.show()
-
+                '''
                 #add to scores
                 score.append([lc_acc_train_x, lc_acc_train_y, lc_acc_test_x, lc_acc_test_y])
 

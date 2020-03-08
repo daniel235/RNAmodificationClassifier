@@ -10,7 +10,7 @@ def get_signal_distribution(x, y):
     pseudo_signal_len = []
     for i in range(len(x)):
         if len(x[i]) < 200:
-            if y[i] == 0:
+            if y[i][0] == 0:
                 control_signal_len.append(len(x[i]))
             else:
                 pseudo_signal_len.append(len(x[i]))
