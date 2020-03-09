@@ -7,9 +7,11 @@ from keras.utils.np_utils import to_categorical
 from keras.optimizers import adam, Nadam, SGD, RMSprop, Adagrad, Adadelta, Adamax
 import numpy as np
 import os
+import matplotlib.pyplot as plt
 from PIL import Image
 from numpy import asarray
 import pathlib
+import platform
 import numpy as np
 import sys
 
@@ -311,12 +313,27 @@ class createCNN():
                 batch.append(x_data_train[i])
                 batch_y.append(y_data_train[i].tolist())
             
+            y_accuracies = []
             for epoch in range(100):
+                accuracies = 0
                 for batch in range(len(train_batches)):
                     guess, opt, costy = sess.run((output, optimizer, cost), feed_dict={x: train_batches[batch], y: y_train_batches[batch]})
                     acc = tf.equal(tf.argmax(guess, 1), tf.argmax(y_train_batches[batch], 1))
                     acc = tf.reduce_mean(tf.cast(acc, tf.float32))
-                    print(acc)
+                    #average out accuracies
+                    accuracies += acc.eval()
 
+                print((accuracies / len(train_batches)))
+                y_accuracies.append(accuracies / len(train_batches))
+
+
+            plt.plot(np.linspace(0, 100, num=100, dtype=int), y_accuracies, label="train")
+            plt.legend()
+            plt.savefig("./results/cnnImageLearningCurve.png")
+            if platform.system() == "Windows":
+                plt.show()
+
+            plt.close()
+            
         
 
