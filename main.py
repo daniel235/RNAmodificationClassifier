@@ -4,6 +4,7 @@ import pandas as pd
 from statistics import mean, median
 from keras.layers import LeakyReLU
 import numpy as np
+import os
 import sys
 import pseudoExtractor as ps
 
@@ -255,6 +256,9 @@ lcurve.createLearningCurve(l.reg, x, y, name="LogReg")
 
 '''
 x, y = getCnnData()
+paths = os.getcwd()
+paths = paths + "\data\images"
+cnn.createCNN(x, y, 3).ImageCNN(paths)
 #x, y = signal.signal_data(x, y)
 #fourier.get_images(x, y)
 

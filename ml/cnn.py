@@ -1,9 +1,15 @@
 from keras.models import Sequential
 from keras import callbacks
+import tensorflow as tf
 from keras.layers import Dense, Conv1D, Conv2D, Flatten, Dropout, MaxPooling1D, LeakyReLU, GlobalAveragePooling1D, ELU
 from keras.activations import elu, selu, tanh, sigmoid, hard_sigmoid, linear, relu
 from keras.utils.np_utils import to_categorical
 from keras.optimizers import adam, Nadam, SGD, RMSprop, Adagrad, Adadelta, Adamax
+import numpy as np
+import os
+from PIL import Image
+from numpy import asarray
+import pathlib
 import numpy as np
 import sys
 
@@ -205,5 +211,93 @@ class createCNN():
         return hist
 
 
-    def ImageCNN(self):
-        pass
+    def get_image_data(self, path_to_images):
+        #read in images
+        files = []
+        for r, d, f in os.walk(path_to_images):
+            for file in f:
+                files.append(os.path.join(r, file))
+
+        image_size = (640, 480)
+        control_images = []
+        pseudo_images = []
+        for image_path in files:
+            image = asarray(Image.open(image_path))
+            image = np.divide(image, 255)
+            if "control" in image_path:
+                control_images.append(image)
+
+            else:
+                pseudo_images.append(image)
+
+        #create x and y data
+        x = control_images
+        
+        y = np.zeros(len(control_images)).tolist()
+        for i in range(len(pseudo_images)):
+            x.append(control_images[i])
+            y.append(1)
+
+        idx = np.random.choice(len(x), len(x), replace=False)
+        x = np.array(x)[idx]
+        y = np.array(y)[idx]
+
+        print(x[0])
+
+        return x, y
+
+
+    def ImageCNN(self, path_to_images):
+        image_size = (640, 480, 4)
+        
+        x = tf.placeholder(dtype=tf.float32, shape=[None, image_size[0], image_size[1], image_size[2]])
+        y = tf.placeholder(shape=[None, 2], dtype=tf.float32)
+
+        weights = {
+            "weight1" : tf.random_normal([5,5,32,32]),
+            "weight2" : tf.random_normal([5,5,32,64]),
+            "out" : tf.random_normal([2])
+        }
+
+        bias = {
+            "bias1" : tf.random_normal([32]),
+            "bias2" : tf.random_normal([64]),
+            "out" : tf.random_normal([2])
+        }
+
+        conv1 = tf.nn.relu(tf.layers.conv2d(x, filters=32, strides=[2,2], kernel_size=5, padding="SAME"))
+        max_pool = tf.nn.max_pool(conv1, ksize=[1,2,2,1], strides=[1,2,2,1], padding="VALID")
+
+        conv2 = tf.nn.relu(tf.layers.conv2d(max_pool, filters=64, strides=[1,1], kernel_size=5, padding="SAME"))
+        max_pool2 = tf.nn.max_pool(conv2, ksize=[1,2,2,1], strides=[1,2,2,1], padding="VALID")
+
+        conv3 = tf.nn.relu(tf.layers.conv2d(max_pool2, filters=128, strides=[1,1], kernel_size=3, padding="SAME"))
+
+        convShape = conv3.get_shape().as_list()
+        print("cshape " , convShape)
+        fully_connected = tf.reshape(conv3, [-1, convShape[1]* convShape[2] * convShape[3]])
+        fully_connected = tf.nn.relu(fully_connected)
+        Dense = tf.nn.dropout(fully_connected, 0.5)
+        weights['out'] = tf.Variable(tf.random_normal([fully_connected.get_shape().as_list()[1], 2]))
+        output = tf.matmul(fully_connected, weights['out'])+bias['out']
+
+        #training
+        cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=output, labels=y))
+        optimizer = tf.train.AdamOptimizer().minimize(cost)
+
+        with tf.Session() as sess:
+            x_data, y_label = self.get_image_data(path_to_images)
+            #split data
+            x_data_train = x_data[:len(x_data)*.8]
+            x_data_test = x_data[len(x_data)*.8:]
+            y_data_train = y_label[:len(y_label) * .8]
+            y_data_test = y_label[len(y_label) * .8:]
+
+            sess.run(tf.global_variables_initializer())
+
+            for epoch in range(100):
+                guess, opt, cost = sess.run((output, optimizer, cost), feed_dict={x: x_data, y: y_label})
+                print(cost)
+
+        
+
