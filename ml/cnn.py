@@ -194,7 +194,7 @@ class createCNN():
             #self.ytrain[i] = self.ytrain[i][rand_index]
             #self.xtest[i] = self.xtest[i][test_rand_index]
             #self.ytest[i] = self.ytest[i][test_rand_index]
-            print("xtrain shape ", self.xtrain[i].shape)
+            
             hist = model.fit(self.xtrain[i], self.ytrain[i], epochs=5, callbacks=[tensor_callback], validation_split=0.2)
             #validation_data=(self.xtest[i], self.ytest[i])
             #self.xtest[i], self.ytest[i] = cfold.getEvenTestData(self.xtest[i], self.ytest[i])
@@ -248,6 +248,7 @@ class createCNN():
 
 
     def ImageCNN(self, path_to_images):
+        tf.reset_default_graph()
         image_size = (640, 480, 4)
         
         x = tf.placeholder(dtype=tf.float32, shape=[None, image_size[0], image_size[1], image_size[2]])
@@ -274,7 +275,6 @@ class createCNN():
         conv3 = tf.nn.relu(tf.layers.conv2d(max_pool2, filters=128, strides=[1,1], kernel_size=3, padding="SAME"))
 
         convShape = conv3.get_shape().as_list()
-        print("cshape " , convShape)
         fully_connected = tf.reshape(conv3, [-1, convShape[1]* convShape[2] * convShape[3]])
         fully_connected = tf.nn.relu(fully_connected)
         Dense = tf.nn.dropout(fully_connected, 0.5)
@@ -286,18 +286,19 @@ class createCNN():
         optimizer = tf.train.AdamOptimizer().minimize(cost)
 
         with tf.Session() as sess:
+            sess.run(tf.global_variables_initializer())
             x_data, y_label = self.get_image_data(path_to_images)
             #split data
-            x_data_train = x_data[:len(x_data)*.8]
-            x_data_test = x_data[len(x_data)*.8:]
-            y_data_train = y_label[:len(y_label) * .8]
-            y_data_test = y_label[len(y_label) * .8:]
-
-            sess.run(tf.global_variables_initializer())
-
+            x_data_train = x_data[:int(len(x_data)*.8)]
+            x_data_test = x_data[int(len(x_data)*.8):]
+            y_data_train = y_label[:int(len(y_label) * .8)]
+            y_data_test = y_label[int(len(y_label) * .8):]
+            
             for epoch in range(100):
                 guess, opt, cost = sess.run((output, optimizer, cost), feed_dict={x: x_data, y: y_label})
-                print(cost)
+                acc = tf.equal(tf.argmax(guess, 1), tf.argmax(y_label, 1))
+                acc = tf.reduce_mean(tf.cast(acc, tf.float32))
+                print(acc)
 
         
 
