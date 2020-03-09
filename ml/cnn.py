@@ -251,8 +251,8 @@ class createCNN():
         tf.reset_default_graph()
         image_size = (480, 640, 4)
         
-        x = tf.placeholder(dtype=tf.float32, shape=[None, image_size[0], image_size[1], image_size[2]])
-        y = tf.placeholder(shape=[None, 2], dtype=tf.float32)
+        x = tf.placeholder(dtype=tf.float32, shape=[None, image_size[0], image_size[1], image_size[2]], name="x_input")
+        y = tf.placeholder(shape=[None, 2], dtype=tf.float32, name="y_input")
 
         weights = {
             "weight1" : tf.random_normal([5,5,32,32]),
@@ -309,7 +309,6 @@ class createCNN():
                     y_train_batches.append(batch_y)
                     batch = []
                     batch_y = []
-
             
             for epoch in range(100):
                 for batch in range(len(train_batches)):
