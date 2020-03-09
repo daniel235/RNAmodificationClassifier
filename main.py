@@ -263,7 +263,7 @@ if platform.system() == 'Windows':
 else:
     paths = paths + "/data/images"
 
-fourier.get_images(x, y)
+#fourier.get_images(x, y)
 cnn.createCNN(x, y, 3).ImageCNN(paths)
 #x, y = signal.signal_data(x, y)
 
