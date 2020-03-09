@@ -249,7 +249,7 @@ class createCNN():
 
     def ImageCNN(self, path_to_images):
         tf.reset_default_graph()
-        image_size = (640, 480, 4)
+        image_size = (480, 640, 4)
         
         x = tf.placeholder(dtype=tf.float32, shape=[None, image_size[0], image_size[1], image_size[2]])
         y = tf.placeholder(shape=[None, 2], dtype=tf.float32)
@@ -291,14 +291,32 @@ class createCNN():
             #split data
             x_data_train = x_data[:int(len(x_data)*.8)]
             x_data_test = x_data[int(len(x_data)*.8):]
-            y_data_train = y_label[:int(len(y_label) * .8)]
-            y_data_test = y_label[int(len(y_label) * .8):]
+            y_data_train = to_categorical(y_label[:int(len(y_label) * .8)])
+            y_data_test = to_categorical(y_label[int(len(y_label) * .8):])
+
+            #create batch sizes for memory issue
+            train_batches = []
+            y_train_batches = []
+            test_batches = []
+            y_test_batches = []
+            batch = []
+            batch_y = []
+            for i in range(len(x_data_train)):
+                batch.append(x_data_train[i])
+                batch_y.append(y_data_train[i])
+                if i % 32 == 0 and i != 0:
+                    train_batches.append(batch)
+                    y_train_batches.append(batch_y)
+                    batch = []
+                    batch_y = []
+
             
             for epoch in range(100):
-                guess, opt, cost = sess.run((output, optimizer, cost), feed_dict={x: x_data, y: y_label})
-                acc = tf.equal(tf.argmax(guess, 1), tf.argmax(y_label, 1))
-                acc = tf.reduce_mean(tf.cast(acc, tf.float32))
-                print(acc)
+                for batch in train_batches:
+                    guess, opt, cost = sess.run((output, optimizer, cost), feed_dict={x: train_batches[batch], y: y_train_batches[batch]})
+                    acc = tf.equal(tf.argmax(guess, 1), tf.argmax(y_train_batches[batch], 1))
+                    acc = tf.reduce_mean(tf.cast(acc, tf.float32))
+                    print(acc)
 
         
 
