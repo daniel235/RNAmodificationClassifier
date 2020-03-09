@@ -314,11 +314,9 @@ class createCNN():
             for epoch in range(100):
                 for batch in range(len(train_batches)):
                     guess, opt, costy = sess.run((output, optimizer, cost), feed_dict={x: train_batches[batch], y: y_train_batches[batch]})
-                    print("guess ", guess)
-                    print("y_train ", y_train_batches[batch])
-                    #acc = tf.equal(tf.argmax(guess, 1), tf.argmax(y_train_batches[batch], 1))
-                    #acc = tf.reduce_mean(tf.cast(acc, tf.float32))
-                    #print(acc)
+                    acc = tf.equal(tf.argmax(guess, 1), tf.argmax(y_train_batches[batch], 1))
+                    acc = tf.reduce_mean(tf.cast(acc, tf.float32))
+                    print(acc)
 
         
 
