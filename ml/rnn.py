@@ -43,14 +43,14 @@ class createRNN():
         y = tf.placeholder(tf.int32, [None, 2])
         #dynamic rnn
         rnn_cell = tf.contrib.rnn.BasicRNNCell(num_units=n_neurons, name="rnn_cell_basic", activation=tf.nn.leaky_relu)
-        lstm_cell = tf.contrib.rnn.LSTMCell(num_units=n_neurons, name="lstm_cell_basic")
+        lstm_cell = tf.contrib.rnn.BasicLSTMCell(num_units=n_neurons, name="lstm_cell_basic", state_is_tuple=False)
         #uneven sequence length
         seq_length = tf.placeholder(tf.int32, [None])
 
-        outputs, states = tf.nn.dynamic_rnn(rnn_cell, x, dtype=tf.float32, sequence_length=seq_length)
+        outputs, states = tf.nn.dynamic_rnn(lstm_cell, x, dtype=tf.float32, sequence_length=seq_length)
         #stat_outputs, stat_states = tf.nn.static_rnn(lstm_cell)
         #states = tf.reshape(states, [n_samples, None])
-        logits = tf.layers.dense(states, 2)
+        logits = tf.layers.dense(states[0], 2)
         #outputs = tf.contrib.layers.flatten(outputs)
         #logits = tf.contrib.layers.fully_connected(outputs, 2)
         
@@ -66,9 +66,9 @@ class createRNN():
         cost = tf.reduce_mean(cross_entropy)
 
         #optimize network
-        #optimize = tf.train.AdamOptimizer()
-        optimize = tf.train.GradientDescentOptimizer(learning_rate=0.01)
-        optOperation = optimize.minimize(cost)
+        optimize = tf.train.AdamOptimizer().minimize(cost)
+        #optimize = tf.train.GradientDescentOptimizer(learning_rate=0.01).minimize(cost)
+        
         #correct = tf.nn.in_top_k(logits, y, 1)
         
         #get accuracy 
@@ -88,8 +88,8 @@ class createRNN():
             accuracies_test = []
             epochs = []
             #train network
-            for epoch in range(600):
-                _, preds = sess.run((optOperation, prediction), feed_dict={x: inputs, y: y_output, seq_length: train_seq_len})
+            for epoch in range(500):
+                _, preds = sess.run((optimize, prediction), feed_dict={x: inputs, y: y_output, seq_length: train_seq_len})
                 
                 accuracy = 0
                 #iterate through predictions

@@ -255,7 +255,7 @@ l = logistic.logRegression()
 l.fit(x, y)
 lcurve.createLearningCurve(l.reg, x, y, name="LogReg")
 
-'''
+
 x, y = getCnnData()
 paths = os.getcwd()
 if platform.system() == 'Windows':
@@ -268,11 +268,11 @@ cnn.createCNN(x, y, 3).ImageCNN(paths)
 #x, y = signal.signal_data(x, y)
 
 
-'''
+
 stats.std_deviation_distribution(x, y)
 stats.signal_amplitude_mean(x, y)
 
-
+'''
 x, y = getCnnData()
 x, y = signal.signal_data(x, y)
 #fourier.read_signal(x, y)
@@ -281,7 +281,7 @@ x, y = signal.signal_data(x, y)
 lstmNet = rnn.createRNN(x, y)
 batch, batchy, test, test_out = lstmNet.createBatchData()
 model = lstmNet.prepareRNN(batch, batchy)
-
+'''
 #lstmNet.runLSTM(model)
 
 '''

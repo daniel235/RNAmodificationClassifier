@@ -312,9 +312,21 @@ class createCNN():
                 
                 batch.append(x_data_train[i])
                 batch_y.append(y_data_train[i].tolist())
+
+            batch, batch_y = [], []
+            
+            for i in range(len(x_data_test)):
+                if i % 32 == 0 and i != 0:
+                    test_batches.append(batch)
+                    y_test_batches.append(batch_y)
+                    batch = []
+                    batch_y = []
+
+                batch.append(x_data_test[i])
+                batch_y.append(y_data_test[i].tolist())
             
             y_accuracies = []
-            for epoch in range(100):
+            for epoch in range(300):
                 accuracies = 0
                 for batch in range(len(train_batches)):
                     guess, opt, costy = sess.run((output, optimizer, cost), feed_dict={x: train_batches[batch], y: y_train_batches[batch]})
@@ -328,7 +340,26 @@ class createCNN():
 
 
             plt.plot(np.linspace(0, 100, num=100, dtype=int), y_accuracies, label="train")
+            
+
+            #run testing epochs
+            y_accuracies = []
+            for epoch in range(300):
+                accuracies = 0
+                for batch in range(len(test_batches)):
+                    guess, opt, costy = sess.run((output, optimizer, cost), feed_dict={x: test_batches[batch], y: y_test_batches[batch]})
+                    acc = tf.equal(tf.argmax(guess, 1), tf.argmax(y_train_batches[batch], 1))
+                    acc = tf.reduce_mean(tf.cast(acc, tf.float32))
+                    #average out accuracies
+                    accuracies += acc.eval()
+
+                print((accuracies / len(test_batches)))
+                y_accuracies.append(accuracies / len(test_batches))
+
+            plt.plot(np.linspace(0, 100, num=100, dtype=int), y_accuracies, label="test")
             plt.legend()
+
+
             plt.savefig("./results/cnnImageLearningCurve.png")
             if platform.system() == "Windows":
                 plt.show()
