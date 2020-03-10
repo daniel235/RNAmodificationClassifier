@@ -341,14 +341,14 @@ class createCNN():
             
                 test_accuracies = 0
                 for batch in range(len(test_batches)):
-                    guess, opt, costy = sess.run((output, optimizer, cost), feed_dict={x: test_batches[batch], y: y_test_batches[batch]})
-                    acc = tf.equal(tf.argmax(guess, 1), tf.argmax(y_train_batches[batch], 1))
+                    guess = sess.run((output), feed_dict={x: test_batches[batch], y: y_test_batches[batch]})
+                    acc = tf.equal(tf.argmax(guess, 1), tf.argmax(y_test_batches[batch], 1))
                     acc = tf.reduce_mean(tf.cast(acc, tf.float32))
                     #average out accuracies
                     test_accuracies += acc.eval()
 
-                print((accuracies / len(test_batches)))
-                y_test_accuracies.append(accuracies / len(test_batches))
+                print((test_accuracies / len(test_batches)))
+                y_test_accuracies.append(test_accuracies / len(test_batches))
 
             plt.plot(np.linspace(0, 300, num=300, dtype=int), y_accuracies, label="train")
             plt.plot(np.linspace(0, 300, num=300, dtype=int), y_test_accuracies, label="test")
