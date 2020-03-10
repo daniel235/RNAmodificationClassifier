@@ -326,6 +326,7 @@ class createCNN():
                 batch_y.append(y_data_test[i].tolist())
             
             y_accuracies = []
+            y_test_accuracies = []
             for epoch in range(300):
                 accuracies = 0
                 for batch in range(len(train_batches)):
@@ -337,26 +338,20 @@ class createCNN():
 
                 print((accuracies / len(train_batches)))
                 y_accuracies.append(accuracies / len(train_batches))
-
-
-            plt.plot(np.linspace(0, 100, num=100, dtype=int), y_accuracies, label="train")
             
-
-            #run testing epochs
-            y_accuracies = []
-            for epoch in range(300):
-                accuracies = 0
+                test_accuracies = 0
                 for batch in range(len(test_batches)):
                     guess, opt, costy = sess.run((output, optimizer, cost), feed_dict={x: test_batches[batch], y: y_test_batches[batch]})
                     acc = tf.equal(tf.argmax(guess, 1), tf.argmax(y_train_batches[batch], 1))
                     acc = tf.reduce_mean(tf.cast(acc, tf.float32))
                     #average out accuracies
-                    accuracies += acc.eval()
+                    test_accuracies += acc.eval()
 
                 print((accuracies / len(test_batches)))
-                y_accuracies.append(accuracies / len(test_batches))
+                y_test_accuracies.append(accuracies / len(test_batches))
 
-            plt.plot(np.linspace(0, 100, num=100, dtype=int), y_accuracies, label="test")
+            plt.plot(np.linspace(0, 300, num=300, dtype=int), y_accuracies, label="train")
+            plt.plot(np.linspace(0, 300, num=300, dtype=int), y_test_accuracies, label="test")
             plt.legend()
 
 
