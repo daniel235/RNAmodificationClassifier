@@ -22,12 +22,19 @@ class createRNN():
         #function to auto tune network 
         pass
 
-    def getRNNCells(self, layers=1, lstm=False, n_neurons=20, activate=tf.nn.leaky_relu):
+    def getRNNCells(self, lstm=False, n_neurons=20, activate=tf.nn.leaky_relu):
         if lstm:
             cell = tf.contrib.rnn.BasicLSTMCell(num_units=n_neurons, activation=activate, state_is_tuple=False)
-        #create multilyaer stack
-        if layers != 1:
-            pass
+        else:
+            cell = tf.contrib.rnn.BasicRNNCell(num_units=n_neurons, activation=activate)
+        
+        return cell
+
+
+    def getMultiLayer(self, layers=2, lstm=False, neurons=20, activate=tf.nn.leaky_relu):
+        multi_cell = tf.contrib.rnn.MultiRNNCell([self.getRNNCells(lstm=True, n_neurons=neurons, activate=activate) for layer in range(layers)], state_is_tuple=False)
+        return multi_cell
+
 
     #todo scale inputs
     def runRecurrentNet(self, inputs, y_output, xtest, ytest):
@@ -54,10 +61,10 @@ class createRNN():
         #uneven sequence length
         seq_length = tf.placeholder(tf.int32, [None])
 
-        outputs, states = tf.nn.dynamic_rnn(lstm_cell, x, dtype=tf.float32, sequence_length=seq_length)
+        outputs, states = tf.nn.dynamic_rnn(self.getMultiLayer(layers=3, lstm=True), x, dtype=tf.float32, sequence_length=seq_length)
         #stat_outputs, stat_states = tf.nn.static_rnn(lstm_cell)
         #states = tf.reshape(states, [n_samples, None])
-        logits = tf.layers.dense(states[0], 2)
+        logits = tf.layers.dense(states, 2)
         #outputs = tf.contrib.layers.flatten(outputs)
         #logits = tf.contrib.layers.fully_connected(outputs, 2)
         
