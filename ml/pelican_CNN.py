@@ -99,18 +99,21 @@ def predictLabel(X, bt, y_output, xtest, ytest, train=True, score=None):
     
         conv1 = tf.nn.leaky_relu(conv2d(x, weights['W_conv1']) + biases['b_conv1'])
         conv1 = maxpool2d(conv1)
+        conv1 = tf.nn.dropout(conv1, 0.1)
     #    print(conv1.shape) ## uncomment to check the shape of 1st CNN layer
         
         conv2 = tf.nn.leaky_relu(conv2d(conv1, weights['W_conv2']) + biases['b_conv2'])
         conv2 = maxpool2d(conv2)
     #    print(conv2.shape) ## uncomment to check the shape of 1st CNN layer
-        conv2 = tf.nn.dropout(conv2, 0.2)
+        conv2 = tf.nn.dropout(conv2, 0.1)
+
         conv3 = tf.nn.leaky_relu(conv2d(conv2, weights['W_conv3']) + biases['b_conv3'])
+        conv3 = tf.nn.dropout(conv3, 0.1)
         #conv3 = maxpool2d(conv3)
     #    print(conv3.shape) ## uncomment to check the shape of 1st CNN layer
     
         conv4 = tf.nn.leaky_relu(conv2d(conv3, weights['W_conv4']) + biases['b_conv4'])
-
+        conv4 = tf.nn.dropout(conv4, 0.1)
         #conv2 == tf.contrib.layers.flatten(conv2)
         #print(conv2.shape)
         conv3s = conv4.get_shape().as_list()
@@ -140,7 +143,7 @@ def predictLabel(X, bt, y_output, xtest, ytest, train=True, score=None):
             cost = tf.reduce_mean( tf.nn.softmax_cross_entropy_with_logits(logits=prediction,labels=y) )
         
         with tf.name_scope('OPtimizer'):
-            optimizer = tf.train.AdamOptimizer().minimize(cost)
+            optimizer = tf.train.AdamOptimizer(learning_rate=0.002).minimize(cost)
             #optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.005).minimize(cost)
             #optimizer = tf.train.MomentumOptimizer(learning_rate=0.001, momentum=0.001, use_nesterov=True).minimize(cost)
     
