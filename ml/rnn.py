@@ -22,6 +22,13 @@ class createRNN():
         #function to auto tune network 
         pass
 
+    def getRNNCells(self, layers=1, lstm=False, n_neurons=20, activate=tf.nn.leaky_relu):
+        if lstm:
+            cell = tf.contrib.rnn.BasicLSTMCell(num_units=n_neurons, activation=activate, state_is_tuple=False)
+        #create multilyaer stack
+        if layers != 1:
+            pass
+
     #todo scale inputs
     def runRecurrentNet(self, inputs, y_output, xtest, ytest):
         tf.reset_default_graph()

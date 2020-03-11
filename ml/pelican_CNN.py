@@ -81,6 +81,7 @@ def predictLabel(X, bt, y_output, xtest, ytest, train=True, score=None):
         weights = {'W_conv1':tf.Variable(tf.random_normal([1,5,1,32])),
                    'W_conv2':tf.Variable(tf.random_normal([1,5,32,64])),
                    'W_conv3':tf.Variable(tf.random_normal([1,5,64,128])),
+                   'W_conv4':tf.Variable(tf.random_normal([1,5,128,256])),
                   
                    'W_fc':tf.Variable(tf.random_normal([9600,1024])),
                    'out':tf.Variable(tf.random_normal([1024, n_classes]))}
@@ -88,29 +89,31 @@ def predictLabel(X, bt, y_output, xtest, ytest, train=True, score=None):
         biases = {'b_conv1':tf.Variable(tf.random_normal([32])),
                    'b_conv2':tf.Variable(tf.random_normal([64])),
                    'b_conv3':tf.Variable(tf.random_normal([128])),
-    
+                   'b_conv4':tf.Variable(tf.random_normal([256])),
                    
                    'b_fc':tf.Variable(tf.random_normal([1024])),
                    'out':tf.Variable(tf.random_normal([n_classes]))}
     
         x = tf.reshape(x, shape=[-1, n_steps, features, 1])
     
-        conv1 = tf.nn.relu(conv2d(x, weights['W_conv1']) + biases['b_conv1'])
+        conv1 = tf.nn.leaky_relu(conv2d(x, weights['W_conv1']) + biases['b_conv1'])
         conv1 = maxpool2d(conv1)
     #    print(conv1.shape) ## uncomment to check the shape of 1st CNN layer
         
-        conv2 = tf.nn.relu(conv2d(conv1, weights['W_conv2']) + biases['b_conv2'])
+        conv2 = tf.nn.leaky_relu(conv2d(conv1, weights['W_conv2']) + biases['b_conv2'])
         conv2 = maxpool2d(conv2)
     #    print(conv2.shape) ## uncomment to check the shape of 1st CNN layer
-    
-        conv3 = tf.nn.relu(conv2d(conv2, weights['W_conv3']) + biases['b_conv3'])
-        conv3 = maxpool2d(conv3)
+        conv2 = tf.nn.dropout(conv2, keep_rate)
+        conv3 = tf.nn.leaky_relu(conv2d(conv2, weights['W_conv3']) + biases['b_conv3'])
+        #conv3 = maxpool2d(conv3)
     #    print(conv3.shape) ## uncomment to check the shape of 1st CNN layer
     
+        conv4 = tf.nn.leaky_relu(conv2d(conv3, weights['W_conv4']) + biases['b_conv4'])
+
         #conv2 == tf.contrib.layers.flatten(conv2)
         #print(conv2.shape)
-        conv3s = conv3.get_shape().as_list()
-        fc = tf.reshape(conv3,[-1, conv3s[1]*conv3s[2]*conv3s[3]])
+        conv3s = conv4.get_shape().as_list()
+        fc = tf.reshape(conv4,[-1, conv3s[1]*conv3s[2]*conv3s[3]])
         print(fc.shape)
         #fc = tf.nn.relu(tf.matmul(fc, weights['W_fc'])+biases['b_fc'])
         fc = tf.nn.relu(fc)
@@ -136,8 +139,9 @@ def predictLabel(X, bt, y_output, xtest, ytest, train=True, score=None):
             cost = tf.reduce_mean( tf.nn.softmax_cross_entropy_with_logits(logits=prediction,labels=y) )
         
         with tf.name_scope('OPtimizer'):
-            #optimizer = tf.train.AdamOptimizer().minimize(cost)
-            optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.001).minimize(cost)
+            optimizer = tf.train.AdamOptimizer().minimize(cost)
+            #optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.005).minimize(cost)
+            #optimizer = tf.train.MomentumOptimizer(learning_rate=0.001, momentum=0.001, use_nesterov=True).minimize(cost)
     
         with tf.name_scope('Accuracy'):
         # # Accuracy
@@ -164,7 +168,6 @@ def predictLabel(X, bt, y_output, xtest, ytest, train=True, score=None):
     #               print(prediction)
             #preds=tf.nn.softmax(prediction)
 #               print("Label:" + str(preds.eval(feed_dict={x: test_X})))
-            
         
             if train:
                 batches = batch(testX, y_output, v_batch_size)
@@ -172,37 +175,49 @@ def predictLabel(X, bt, y_output, xtest, ytest, train=True, score=None):
                 loss_list = []
                 lc_acc_train_x, lc_acc_train_y = [], []
                 lc_acc_test_x, lc_acc_test_y = [], []
-                for epoch in range(250):
+                for epoch in range(500):
+                    accuracy = 0
                     for _ in range(len(batches)):
                         test_X, y_batch = batches[_][0], batches[_][1]
                         #train first
                         op, loss = sess.run((optimizer, cost), feed_dict={x: test_X, y: y_batch})
                         loss_list.append(loss)
                         #get test data
-                        accuracy = acc.eval(feed_dict={x: test_X, y: y_batch.reshape(v_batch_size,2)})
-                        lcc_acc_train_y.append(accuracy)
-                        print("train ", accuracy)
+                        accuracy += acc.eval(feed_dict={x: test_X, y: y_batch.reshape(v_batch_size,2)})
+                        
+
+                    lc_acc_train_y.append(accuracy / len(batches))
+                    print(epoch, " epoch train ", (accuracy/len(batches)))
                     
+                    accuracy = 0
                     for _ in range(len(test_batches)):
                         test_X, y_batch = test_batches[_][0], test_batches[_][1]
-                        accuracy = acc.eval(feed_dict={x: test_X, y: y_batch})
-                        
-                        
+                        accuracy += acc.eval(feed_dict={x: test_X, y: y_batch})
+
+
+                    lc_acc_test_y.append(accuracy / len(test_batches))
                     lc_acc_test_x.append(epoch)
-                    print("test acc ", accuracy)
+                    print(epoch, " epoch test acc ", (accuracy/ len(test_batches)))
                     
 
-                plt.plot(lc_acc_train_x, lc_acc_train_y, label="training")
-                plt.plot(lc_acc_test_x, lc_acc_test_y, label="validation")
-                    
+                #stabilize learning curves
+                lc_acc_test_x = np.linspace(0, 500, num=20).tolist()
+                train_y_val = []
+                test_y_val = []
+                for index in lc_acc_test_x:
+                    train_y_val.append(lc_acc_train_y[index])
+                    test_y_val.append(lc_acc_test_y[index])
 
-                '''
+                plt.plot(lc_acc_test_x, train_y_val, label="training")
+                plt.plot(lc_acc_test_x, test_y_val, label="validation")
+                    
+                
                 plt.legend()
                 plt.savefig("./results/PelicanLC.png")
                 plt.show()
-                '''
+                
                 #add to scores
-                score.append([lc_acc_train_x, lc_acc_train_y, lc_acc_test_x, lc_acc_test_y])
+                #score.append([lc_acc_train_x, lc_acc_train_y, lc_acc_test_x, lc_acc_test_y])
 
             else:
                 saver.restore(sess,dir +'/')

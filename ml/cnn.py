@@ -180,7 +180,7 @@ class createCNN():
                 sc = pelican.predictLabel(self.xtrain[i], 64, self.ytrain[i], self.xtest[i], self.ytest[i], score=sc)
 
             #plot real learning curves
-            lc.createLearningCurve(None, None, None, None, name="Pelican", is_estimator=False, scores=sc)
+            #lc.createLearningCurve(None, None, None, None, name="Pelican", is_estimator=False, scores=sc)
             return
 
         model = self.build_seq_model(filter=f, kernel=k, activator=a, optimize=optimizers)
