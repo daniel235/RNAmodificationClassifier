@@ -143,7 +143,7 @@ def predictLabel(X, bt, y_output, xtest, ytest, train=True, score=None):
             cost = tf.reduce_mean( tf.nn.softmax_cross_entropy_with_logits(logits=prediction,labels=y) )
         
         with tf.name_scope('OPtimizer'):
-            optimizer = tf.train.AdamOptimizer(learning_rate=0.002).minimize(cost)
+            optimizer = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
             #optimizer = tf.train.GradientDescentOptimizer(learning_rate=0.005).minimize(cost)
             #optimizer = tf.train.MomentumOptimizer(learning_rate=0.001, momentum=0.001, use_nesterov=True).minimize(cost)
     
