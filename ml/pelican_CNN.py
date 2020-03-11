@@ -1,6 +1,7 @@
 import tensorflow as tf
 from tensorflow.contrib import rnn
 import numpy as np
+import platform
 #import pandas as pd ### For future manipulations
 #import scipy as sp ### For future manipulations
 import matplotlib.pyplot as plt  #### Uncomment and use if you would like to see the traiing dataset length frequency plots
@@ -103,7 +104,7 @@ def predictLabel(X, bt, y_output, xtest, ytest, train=True, score=None):
         conv2 = tf.nn.leaky_relu(conv2d(conv1, weights['W_conv2']) + biases['b_conv2'])
         conv2 = maxpool2d(conv2)
     #    print(conv2.shape) ## uncomment to check the shape of 1st CNN layer
-        conv2 = tf.nn.dropout(conv2, keep_rate)
+        conv2 = tf.nn.dropout(conv2, 0.2)
         conv3 = tf.nn.leaky_relu(conv2d(conv2, weights['W_conv3']) + biases['b_conv3'])
         #conv3 = maxpool2d(conv3)
     #    print(conv3.shape) ## uncomment to check the shape of 1st CNN layer
@@ -175,7 +176,7 @@ def predictLabel(X, bt, y_output, xtest, ytest, train=True, score=None):
                 loss_list = []
                 lc_acc_train_x, lc_acc_train_y = [], []
                 lc_acc_test_x, lc_acc_test_y = [], []
-                for epoch in range(500):
+                for epoch in range(1000):
                     accuracy = 0
                     for _ in range(len(batches)):
                         test_X, y_batch = batches[_][0], batches[_][1]
@@ -205,8 +206,8 @@ def predictLabel(X, bt, y_output, xtest, ytest, train=True, score=None):
                 train_y_val = []
                 test_y_val = []
                 for index in lc_acc_test_x:
-                    train_y_val.append(lc_acc_train_y[index])
-                    test_y_val.append(lc_acc_test_y[index])
+                    train_y_val.append(lc_acc_train_y[int(index)])
+                    test_y_val.append(lc_acc_test_y[int(index)])
 
                 plt.plot(lc_acc_test_x, train_y_val, label="training")
                 plt.plot(lc_acc_test_x, test_y_val, label="validation")
@@ -214,7 +215,8 @@ def predictLabel(X, bt, y_output, xtest, ytest, train=True, score=None):
                 
                 plt.legend()
                 plt.savefig("./results/PelicanLC.png")
-                plt.show()
+                if platform.system() == "Windows":
+                    plt.show()
                 
                 #add to scores
                 #score.append([lc_acc_train_x, lc_acc_train_y, lc_acc_test_x, lc_acc_test_y])
