@@ -102,7 +102,7 @@ class createRNN():
             accuracies_test = []
             epochs = []
             #train network
-            for epoch in range(500):
+            for epoch in range(1000):
                 _, preds = sess.run((optimize, prediction), feed_dict={x: inputs, y: y_output, seq_length: train_seq_len})
                 
                 accuracy = 0
