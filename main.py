@@ -159,7 +159,6 @@ def getSvmData():
         for j in range(1, len(kmerData[i])):
             row.append(kmerData[i][j])
 
-
         svmDatax.append(row)
         svmDatay.append([0])
 
@@ -226,13 +225,13 @@ kneighbors = knn.createKNN()
 lcurve.createLearningCurve(kneighbors.knn, x, y, name="knn")
 
 ##################   Call CNN   #######################
-'''
+
 x, y = getCnnData()
 x, y = signal.signal_data(x, y)
 model = cnn.createCNN(x, y, 10)
 #model.run_model()
 model = model.single_run(f=80, a='relu', k=20)
-'''
+
 lcurve.createLearningCurve(model, x, y, keras=True, name="CNN")
 
 #call learning curve

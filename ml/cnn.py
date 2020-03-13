@@ -268,16 +268,19 @@ class createCNN():
             "out" : tf.random_normal([2])
         }
 
-        conv1 = tf.nn.relu(tf.layers.conv2d(x, filters=32, strides=[2,2], kernel_size=5, padding="SAME"))
+        conv1 = tf.nn.leaky_relu(tf.layers.conv2d(x, filters=32, strides=[2,2], kernel_size=5, padding="SAME"))
         max_pool = tf.nn.max_pool(conv1, ksize=[1,2,2,1], strides=[1,2,2,1], padding="VALID")
 
-        conv2 = tf.nn.relu(tf.layers.conv2d(max_pool, filters=64, strides=[1,1], kernel_size=5, padding="SAME"))
+        conv2 = tf.nn.leaky_relu(tf.layers.conv2d(max_pool, filters=64, strides=[1,1], kernel_size=5, padding="SAME"))
         max_pool2 = tf.nn.max_pool(conv2, ksize=[1,2,2,1], strides=[1,2,2,1], padding="VALID")
 
-        conv3 = tf.nn.relu(tf.layers.conv2d(max_pool2, filters=128, strides=[1,1], kernel_size=3, padding="SAME"))
+        conv3 = tf.nn.leaky_relu(tf.layers.conv2d(max_pool2, filters=128, strides=[1,1], kernel_size=3, padding="SAME"))
+        
+        conv4 = tf.nn.leaky_relu(tf.layers.conv2d(conv3, filters=256, strides=[1,1], kernel_size=3, padding="SAME"))
+        
 
-        convShape = conv3.get_shape().as_list()
-        fully_connected = tf.reshape(conv3, [-1, convShape[1]* convShape[2] * convShape[3]])
+        convShape = conv4.get_shape().as_list()
+        fully_connected = tf.reshape(conv4, [-1, convShape[1]* convShape[2] * convShape[3]])
         fully_connected = tf.nn.relu(fully_connected)
         Dense = tf.nn.dropout(fully_connected, 0.5)
         weights['out'] = tf.Variable(tf.random_normal([fully_connected.get_shape().as_list()[1], 2]))
@@ -327,7 +330,7 @@ class createCNN():
             
             y_accuracies = []
             y_test_accuracies = []
-            for epoch in range(300):
+            for epoch in range(1000):
                 accuracies = 0
                 for batch in range(len(train_batches)):
                     guess, opt, costy = sess.run((output, optimizer, cost), feed_dict={x: train_batches[batch], y: y_train_batches[batch]})
@@ -336,7 +339,7 @@ class createCNN():
                     #average out accuracies
                     accuracies += acc.eval()
 
-                print((accuracies / len(train_batches)))
+                print("train ", (accuracies / len(train_batches)))
                 y_accuracies.append(accuracies / len(train_batches))
             
                 test_accuracies = 0
@@ -347,11 +350,11 @@ class createCNN():
                     #average out accuracies
                     test_accuracies += acc.eval()
 
-                print((test_accuracies / len(test_batches)))
+                print("test ", (test_accuracies / len(test_batches)))
                 y_test_accuracies.append(test_accuracies / len(test_batches))
 
-            plt.plot(np.linspace(0, 300, num=300, dtype=int), y_accuracies, label="train")
-            plt.plot(np.linspace(0, 300, num=300, dtype=int), y_test_accuracies, label="test")
+            plt.plot(np.linspace(0, 1000, num=1000, dtype=int), y_accuracies, label="train")
+            plt.plot(np.linspace(0, 1000, num=1000, dtype=int), y_test_accuracies, label="test")
             plt.legend()
 
 

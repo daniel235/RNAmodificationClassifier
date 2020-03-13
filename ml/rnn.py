@@ -18,10 +18,6 @@ class createRNN():
         self.xtrain, self.ytrain, self.xtest, self.ytest = cfold.splitData(5, x, y)
         
 
-    def hyperTune(self):
-        #function to auto tune network 
-        pass
-
     def getRNNCells(self, lstm=False, n_neurons=20, activate=tf.nn.leaky_relu):
         if lstm:
             cell = tf.contrib.rnn.BasicLSTMCell(num_units=n_neurons, activation=activate, state_is_tuple=False)
@@ -102,7 +98,8 @@ class createRNN():
             accuracies_test = []
             epochs = []
             #train network
-            for epoch in range(1000):
+            num_epochs = 1000
+            for epoch in range(num_epochs):
                 _, preds = sess.run((optimize, prediction), feed_dict={x: inputs, y: y_output, seq_length: train_seq_len})
                 
                 accuracy = 0
@@ -126,7 +123,15 @@ class createRNN():
                         accuracy += 1
 
                 accuracies_test.append(float(accuracy / len(ytest)))
-           
+                print(epoch, " ", float(accuracy / len(ytest)))
+            '''
+            #get smooth indexes
+            indexes = np.linspace(0, num_epochs-1, num=(num_epochs/10), dtype=int)
+
+            epochs = np.array(epochs)[indexes].tolist()
+            accuracies = np.array(accuracies)[indexes].tolist()
+            accuracies_test = np.array(accuracies_test)[indexes].tolist()
+            '''
             #plot learning curves
             plt.plot(epochs, accuracies, label="training")
             plt.plot(epochs, accuracies_test, label="testing")
