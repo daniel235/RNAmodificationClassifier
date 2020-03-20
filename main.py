@@ -363,7 +363,7 @@ cnn.createCNN(x, y, 3).ImageCNN(paths)
 stats.std_deviation_distribution(x, y)
 stats.signal_amplitude_mean(x, y)
 
-
+'''
 x, y = getRnnData()
 x, y = signal.signal_data(x, y)
 #fourier.read_signal(x, y)
@@ -372,7 +372,7 @@ x, y = signal.signal_data(x, y)
 lstmNet = rnn.createRNN(x, y)
 batch, batchy, test, test_out = lstmNet.createBatchData()
 model = lstmNet.prepareRNN(batch, batchy)
-
+'''
 #lstmNet.runLSTM(model)
 
 '''
