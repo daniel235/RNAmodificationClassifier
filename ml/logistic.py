@@ -4,7 +4,7 @@ import numpy as np
 
 class logRegression():
     def __init__(self):
-        self.reg = LogisticRegression(random_state=42, max_iter=1000000)
+        self.reg = LogisticRegression(random_state=42, max_iter=1000000, C=.8)
         
 
     def fit(self, x, y):

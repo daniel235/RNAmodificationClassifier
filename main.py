@@ -200,7 +200,7 @@ def getRnnData():
         tempx.append(min(kmerData[i][1:]))
         tempx.append(max(kmerData[i][1:]))
         tempx.append(len(kmerData[i][1:]))
-    
+        '''
         #signal input
         for j in range(len(kmers_hot[i])):
             tempx.append(kmers_hot[i][j])
@@ -208,9 +208,10 @@ def getRnnData():
         tempx = np.array(tempx)
         #tempx.append(kmerData[i][1:])
         tempx = np.concatenate([tempx, kmerData[i][1:]])
-        rnnDatax.append(tempx.tolist())
+        '''
+        rnnDatax.append(tempx)
         rnnDatay.append([0])
-
+        
     tempx = []
     for i in range(len(pseudoKmerData)):
         #signal input
@@ -220,13 +221,16 @@ def getRnnData():
         tempx.append(min(pseudoKmerData[i][1:]))
         tempx.append(max(pseudoKmerData[i][1:]))
         tempx.append(len(pseudoKmerData[i][1:]))
+        '''
         for j in range(len(pkmers_hot[i])):
             tempx.append(pkmers_hot[i][j])
-
+        
         tempx = np.array(tempx)
+        
         #tempx.append(pseudoKmerData[i][1:])
         tempx = np.concatenate([tempx, pseudoKmerData[i][1:]])
-        rnnDatax.append(tempx.tolist())
+        '''
+        rnnDatax.append(tempx)
         rnnDatay.append([1])
 
     
@@ -331,7 +335,7 @@ lcurve.createLearningCurve(estimator, model.X, model.Y)
 
 #################  Call Logistic Regression  #############
 
-x, y = getSvmData()
+x, y = getRnnData()
 x, y = signal.signal_data(x, y)
 indexes = np.random.choice(len(x), len(x), replace=False)
 x = np.array(x)
@@ -359,7 +363,7 @@ cnn.createCNN(x, y, 3).ImageCNN(paths)
 stats.std_deviation_distribution(x, y)
 stats.signal_amplitude_mean(x, y)
 
-'''
+
 x, y = getRnnData()
 x, y = signal.signal_data(x, y)
 #fourier.read_signal(x, y)
@@ -368,7 +372,7 @@ x, y = signal.signal_data(x, y)
 lstmNet = rnn.createRNN(x, y)
 batch, batchy, test, test_out = lstmNet.createBatchData()
 model = lstmNet.prepareRNN(batch, batchy)
-'''
+
 #lstmNet.runLSTM(model)
 
 '''
