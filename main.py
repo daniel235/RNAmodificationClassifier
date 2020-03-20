@@ -193,8 +193,15 @@ def getRnnData():
     
     tempx = []
     for i in range(len(kmerData)):
-        #signal input
         tempx = []
+        #get mean median max min length
+        tempx.append(median(kmerData[i][1:]))
+        tempx.append(mean(kmerData[i][1:]))
+        tempx.append(min(kmerData[i][1:]))
+        tempx.append(max(kmerData[i][1:]))
+        tempx.append(len(kmerData[i][1:]))
+    
+        #signal input
         for j in range(len(kmers_hot[i])):
             tempx.append(kmers_hot[i][j])
 
@@ -204,10 +211,15 @@ def getRnnData():
         rnnDatax.append(tempx.tolist())
         rnnDatay.append([0])
 
-
+    tempx = []
     for i in range(len(pseudoKmerData)):
         #signal input
         tempx = []
+        tempx.append(median(pseudoKmerData[i][1:]))
+        tempx.append(mean(pseudoKmerData[i][1:]))
+        tempx.append(min(pseudoKmerData[i][1:]))
+        tempx.append(max(pseudoKmerData[i][1:]))
+        tempx.append(len(pseudoKmerData[i][1:]))
         for j in range(len(pkmers_hot[i])):
             tempx.append(pkmers_hot[i][j])
 
