@@ -60,7 +60,7 @@ class createRNN():
         #uneven sequence length
         seq_length = tf.placeholder(tf.int32, [None])
 
-        outputs, states = tf.nn.dynamic_rnn(self.getMultiLayer(layers=1, lstm=False, activate=tf.nn.relu), x, dtype=tf.float32, sequence_length=seq_length)
+        outputs, states = tf.nn.dynamic_rnn(self.getMultiLayer(layers=3, lstm=False, activate=tf.nn.relu, neurons=15), x, dtype=tf.float32, sequence_length=seq_length)
         #stat_outputs, stat_states = tf.nn.static_rnn(lstm_cell)
         #states = tf.reshape(states, [n_samples, None])
         logits = tf.layers.dense(states, 2)
