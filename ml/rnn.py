@@ -57,7 +57,7 @@ class createRNN():
         #uneven sequence length
         seq_length = tf.placeholder(tf.int32, [None])
 
-        outputs, states = tf.nn.dynamic_rnn(self.getMultiLayer(layers=3, lstm=True), x, dtype=tf.float32, sequence_length=seq_length)
+        outputs, states = tf.nn.dynamic_rnn(self.getMultiLayer(layers=2, lstm=True), x, dtype=tf.float32, sequence_length=seq_length)
         #stat_outputs, stat_states = tf.nn.static_rnn(lstm_cell)
         #states = tf.reshape(states, [n_samples, None])
         logits = tf.layers.dense(states, 2)
@@ -76,7 +76,7 @@ class createRNN():
         cost = tf.reduce_mean(cross_entropy)
 
         #optimize network
-        optimize = tf.train.AdamOptimizer().minimize(cost)
+        optimize = tf.train.AdamOptimizer(learning_rate=0.0005).minimize(cost)
         #optimize = tf.train.GradientDescentOptimizer(learning_rate=0.01).minimize(cost)
         
         #correct = tf.nn.in_top_k(logits, y, 1)
@@ -98,7 +98,7 @@ class createRNN():
             accuracies_test = []
             epochs = []
             #train network
-            num_epochs = 1000
+            num_epochs = 300
             for epoch in range(num_epochs):
                 _, preds = sess.run((optimize, prediction), feed_dict={x: inputs, y: y_output, seq_length: train_seq_len})
                 
@@ -124,14 +124,14 @@ class createRNN():
 
                 accuracies_test.append(float(accuracy / len(ytest)))
                 print(epoch, " ", float(accuracy / len(ytest)))
-            '''
+            
             #get smooth indexes
             indexes = np.linspace(0, num_epochs-1, num=(num_epochs/10), dtype=int)
 
             epochs = np.array(epochs)[indexes].tolist()
             accuracies = np.array(accuracies)[indexes].tolist()
             accuracies_test = np.array(accuracies_test)[indexes].tolist()
-            '''
+            
             #plot learning curves
             plt.plot(epochs, accuracies, label="training")
             plt.plot(epochs, accuracies_test, label="testing")

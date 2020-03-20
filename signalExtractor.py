@@ -3,6 +3,7 @@ import numpy as np
 
 def signal_data(x, y, timestep=120):
     max = 0
+    
     paddedx = []
     paddedy = []
     #get longest sequence in data
@@ -11,20 +12,22 @@ def signal_data(x, y, timestep=120):
         if len(x[i]) > max and len(x[i]) < 200:
             max = len(x[i])
     '''
-    max = 200
+    max = 600
     #pad all elements to max length
     for i in range(len(x)):
-        if len(x[i]) > 200:
-            x = x[:200]
+        if type(x[i]) == 'ndarray':
+            x[i] = x[i].tolist()
 
-        elif len(x[i]) < 200:
+        if len(x[i]) >= max:
+            x = x[:max]
+
+        elif len(x[i]) < max:
             #input raw signal data until signal array full
             for j in range(len(x[i]), max):
                 x[i].append(0)
 
         paddedx.append(x[i])
         paddedy.append(y[i])
-
 
 
     paddedx = np.array(paddedx)

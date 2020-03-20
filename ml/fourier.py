@@ -13,7 +13,7 @@ def get_images(signal, output):
         #y = y_value_signal(sig)
         y = np.exp(2j * np.pi * sig / len(sig))
     
-        y = fft(y)
+        #y = fft(y)
         plt.grid()
         plt.plot(x_axis, y)
 

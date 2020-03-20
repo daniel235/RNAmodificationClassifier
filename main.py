@@ -105,6 +105,32 @@ Y = np.array(Yval)
 print(len(X), len(Y))
 
 
+#get all kmers
+kmerList = []
+for i in range(len(totalControlKmerData)):
+    kmerList.append([totalControlKmerData[i][0]])
+
+for i in range(len(pseudoKmerData)):
+    kmerList.append([pseudoKmerData[i][0]])
+
+
+le = preprocessing.LabelEncoder()
+
+le.fit(kmerList)
+
+print(le.classes_)
+
+X = le.transform(kmerList)
+
+X = X.reshape(-1, 1)
+
+#onehot encode
+enc = OneHotEncoder(handle_unknown='ignore')
+
+enc.fit(X)
+
+
+
 ################# Data inputs for classifiers  ########################
 
 def getKnnData():
@@ -144,6 +170,56 @@ def getCnnData():
         CnnDatay.append([1])
 
     return CnnDatax, CnnDatay
+
+
+def getRnnData():
+    index = np.random.choice(len(controlHela), len(pseudoHela), replace=False)
+    kmerData = totalControlKmerData[index]
+    rnnDatax = []
+    rnnDatay = []
+    kmers = []
+    pkmers = []
+
+    for i in range(len(pseudoKmerData)):
+        kmers.append(kmerData[i][0])
+        pkmers.append(pseudoKmerData[i][0])
+
+    kmers = le.transform(kmers)
+    kmers = kmers.reshape(-1, 1)
+    pkmers = le.transform(pkmers)
+    pkmers = pkmers.reshape(-1, 1)
+    kmers_hot = enc.transform(kmers).toarray()
+    pkmers_hot = enc.transform(pkmers).toarray()
+    
+    tempx = []
+    for i in range(len(kmerData)):
+        #signal input
+        tempx = []
+        for j in range(len(kmers_hot[i])):
+            tempx.append(kmers_hot[i][j])
+
+        tempx = np.array(tempx)
+        #tempx.append(kmerData[i][1:])
+        tempx = np.concatenate([tempx, kmerData[i][1:]])
+        rnnDatax.append(tempx.tolist())
+        rnnDatay.append([0])
+
+
+    for i in range(len(pseudoKmerData)):
+        #signal input
+        tempx = []
+        for j in range(len(pkmers_hot[i])):
+            tempx.append(pkmers_hot[i][j])
+
+        tempx = np.array(tempx)
+        #tempx.append(pseudoKmerData[i][1:])
+        tempx = np.concatenate([tempx, pseudoKmerData[i][1:]])
+        rnnDatax.append(tempx.tolist())
+        rnnDatay.append([1])
+
+    
+
+    return rnnDatax, rnnDatay
 
 
 def getSvmData():
@@ -272,7 +348,7 @@ stats.std_deviation_distribution(x, y)
 stats.signal_amplitude_mean(x, y)
 
 '''
-x, y = getCnnData()
+x, y = getRnnData()
 x, y = signal.signal_data(x, y)
 #fourier.read_signal(x, y)
 #rnet = rnn.createRNN()
