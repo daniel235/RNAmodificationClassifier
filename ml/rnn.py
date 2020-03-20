@@ -28,7 +28,10 @@ class createRNN():
 
 
     def getMultiLayer(self, layers=2, lstm=False, neurons=20, activate=tf.nn.leaky_relu):
-        multi_cell = tf.contrib.rnn.MultiRNNCell([self.getRNNCells(lstm=True, n_neurons=neurons, activate=activate) for layer in range(layers)], state_is_tuple=False)
+        if layers > 1:
+            multi_cell = tf.contrib.rnn.MultiRNNCell([self.getRNNCells(lstm=True, n_neurons=neurons, activate=activate) for layer in range(layers)], state_is_tuple=False)
+        else:
+            return self.getRNNCells(lstm, n_neurons=neurons, activate=activate)
         return multi_cell
 
 
@@ -57,7 +60,7 @@ class createRNN():
         #uneven sequence length
         seq_length = tf.placeholder(tf.int32, [None])
 
-        outputs, states = tf.nn.dynamic_rnn(self.getMultiLayer(layers=2, lstm=True), x, dtype=tf.float32, sequence_length=seq_length)
+        outputs, states = tf.nn.dynamic_rnn(self.getMultiLayer(layers=1, lstm=True), x, dtype=tf.float32, sequence_length=seq_length)
         #stat_outputs, stat_states = tf.nn.static_rnn(lstm_cell)
         #states = tf.reshape(states, [n_samples, None])
         logits = tf.layers.dense(states, 2)
@@ -98,7 +101,7 @@ class createRNN():
             accuracies_test = []
             epochs = []
             #train network
-            num_epochs = 300
+            num_epochs = 800
             for epoch in range(num_epochs):
                 _, preds = sess.run((optimize, prediction), feed_dict={x: inputs, y: y_output, seq_length: train_seq_len})
                 
