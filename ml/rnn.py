@@ -60,7 +60,7 @@ class createRNN():
         #uneven sequence length
         seq_length = tf.placeholder(tf.int32, [None])
 
-        outputs, states = tf.nn.dynamic_rnn(self.getMultiLayer(layers=1, lstm=True), x, dtype=tf.float32, sequence_length=seq_length)
+        outputs, states = tf.nn.dynamic_rnn(self.getMultiLayer(layers=1, lstm=False, activate=tf.nn.relu), x, dtype=tf.float32, sequence_length=seq_length)
         #stat_outputs, stat_states = tf.nn.static_rnn(lstm_cell)
         #states = tf.reshape(states, [n_samples, None])
         logits = tf.layers.dense(states, 2)
@@ -79,7 +79,7 @@ class createRNN():
         cost = tf.reduce_mean(cross_entropy)
 
         #optimize network
-        optimize = tf.train.AdamOptimizer(learning_rate=0.0005).minimize(cost)
+        optimize = tf.train.AdamOptimizer(learning_rate=0.001).minimize(cost)
         #optimize = tf.train.GradientDescentOptimizer(learning_rate=0.01).minimize(cost)
         
         #correct = tf.nn.in_top_k(logits, y, 1)
