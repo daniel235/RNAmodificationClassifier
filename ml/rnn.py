@@ -56,8 +56,8 @@ class createRNN():
         x = tf.placeholder(tf.float32, [None, n_steps, n_features], name="X_input")
         y = tf.placeholder(tf.int32, [None, 2])
         #dynamic rnn
-        rnn_cell = tf.contrib.rnn.BasicRNNCell(num_units=n_neurons, name="rnn_cell_basic", activation=tf.nn.leaky_relu)
-        lstm_cell = tf.contrib.rnn.BasicLSTMCell(num_units=n_neurons, name="lstm_cell_basic", state_is_tuple=False)
+        rnn_cell = tf.contrib.rnn.BasicRNNCell(num_units=n_neurons, activation=tf.nn.leaky_relu)
+        lstm_cell = tf.contrib.rnn.BasicLSTMCell(num_units=n_neurons, state_is_tuple=False)
         #uneven sequence length
         seq_length = tf.placeholder(tf.int32, [None])
 
