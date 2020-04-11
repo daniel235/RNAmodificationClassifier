@@ -184,7 +184,7 @@ def getCnnData():
     return CnnDatax, CnnDatay
 
 
-def getRnnData():
+def getKmerRnnData():
     index = np.random.choice(len(controlHela), len(pseudoHela), replace=False)
     kmerData = totalControlKmerData[index]
     rnnDatax = []
@@ -245,7 +245,21 @@ def getRnnData():
         rnnDatax.append(tempx)
         rnnDatay.append([1])
 
-    
+    return rnnDatax, rnnDatay
+
+
+def getRnnData():
+    index = np.random.choice(len(controlHela), len(pseudoHela), replace=False)
+    kmerData = totalControlKmerData[index]
+    rnnDatax = []
+    rnnDatay = []
+    for i in range(len(kmerData)):
+        rnnDatax.append(kmerData[i][1:])
+        rnnDatay.append([0])
+
+    for i in range(len(pseudoKmerData)):
+        rnnDatax.append(pseudoKmerData[i][1:])
+        rnnDatay.apend([1])
 
     return rnnDatax, rnnDatay
 
