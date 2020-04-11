@@ -1,5 +1,6 @@
 import tensorflow.contrib.keras as keras
 import tensorflow as tf
+import tensorflow.contrib
 from keras.models import Sequential
 from keras.utils.np_utils import to_categorical
 from keras.layers import LSTM, Dense, Dropout, Input, Flatten

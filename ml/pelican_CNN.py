@@ -1,5 +1,5 @@
 import tensorflow as tf
-from tensorflow.contrib import rnn
+#from tensorflow.contrib import rnn
 import numpy as np
 import platform
 #import pandas as pd ### For future manipulations
