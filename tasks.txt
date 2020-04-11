@@ -1,3 +1,6 @@
 shuffle test data (network is converging on control data)
 gan network to generate data
 Filter proportional to signal length
+
+
+tensorflow = 1.5.0
