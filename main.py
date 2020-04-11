@@ -24,13 +24,25 @@ import testing.learningCurve as lcurve
 import stats.stats as stats
 
 
-#start pseudoExtractor 
-controlHela, pseudoHela = ps.get_Hela()
-
-#omit file name
+controlHela = pd.DataFrame()
+pseudoHela = pd.DataFrame()
 drp = [0, 2]
-controlHela = controlHela.drop(drp, axis=1)
-pseudoHela = pseudoHela.drop(drp, axis=1)
+#continous file extraction
+while(True):
+    #start pseudoExtractor 
+    choice1 = input("get control?(y/n)")
+    if choice1 == 'y':
+        temPcontrolHela = ps.get_control_Hela()
+        controlHela = controlHela.append(temPcontrolHela.drop(drp, axis=1))
+        
+    choice2 = input("get pseudo?(y/n)")
+    if choice2 == 'y':
+        temPpseudoHela = ps.get_pseudo_Hela()
+        pseudoHela = pseudoHela.append(temPpseudoHela.drop(drp, axis=1))
+        
+
+    if choice1 != 'y' and choice2 != 'y':
+        break
 
 
 ################### Extract data ###########################
@@ -88,13 +100,13 @@ Y = []
 Yval = []
 
 #get random indexes
-prevIndexes = np.random.choice(len(controlHela), 364, replace=False)
+prevIndexes = np.random.choice(len(controlHela), len(pseudoHela), replace=False)
 
 #set length to 300(random choices)
 totalControlKmerData = np.array(kmerData)
 kmerData = np.array(kmerData)[prevIndexes]
 print("size of ", len(kmerData))
-total = 364 + len(pseudoHela)
+total = len(pseudoHela) * 2
 #indexes = np.random.choice(total, total, replace=False)
 
 allKmerData = []

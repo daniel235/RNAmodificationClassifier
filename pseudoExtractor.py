@@ -89,7 +89,15 @@ def get_Hela():
     print(dfModified)
     return dfControl, dfModified
 
+def get_control_Hela():
+    controlFile = get_file()
+    dfControl = pd.read_csv(controlFile, sep=' ', header=None)
+    return dfControl
 
+def get_pseudo_Hela():
+    pseudoFile = get_file()
+    dfModified = pd.read_csv(pseudoFile, sep=' ', header=None)
+    return dfModified
 
 def event_reader(filename=None):
     eventFile = get_file()
