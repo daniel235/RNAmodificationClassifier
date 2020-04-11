@@ -18,6 +18,7 @@ import ml.cnn as cnn
 import ml.logistic as logistic
 import ml.fourier as fourier
 import ml.rnn as rnn
+import ml.ann as ann
 import ml.sgd as sgd 
 import signalExtractor as signal
 import testing.learningCurve as lcurve
@@ -259,7 +260,7 @@ def getRnnData():
 
     for i in range(len(pseudoKmerData)):
         rnnDatax.append(pseudoKmerData[i][1:])
-        rnnDatay.apend([1])
+        rnnDatay.append([1])
 
     return rnnDatax, rnnDatay
 
@@ -392,12 +393,16 @@ stats.signal_amplitude_mean(x, y)
 '''
 x, y = getRnnData()
 x, y = signal.signal_data(x, y)
+
+ann.run_ann(x, y)
+
+'''
 #fourier.read_signal(x, y)
 #rnet = rnn.createRNN()
 #rnet.createNet(x, y)
 lstmNet = rnn.createRNN(x, y)
 batch, batchy, test, test_out = lstmNet.createBatchData()
-model = lstmNet.prepareRNN(batch, batchy)
+model = lstmNet.prepareRNN(batch, batchy)'''
 '''
 #lstmNet.runLSTM(model)
 
