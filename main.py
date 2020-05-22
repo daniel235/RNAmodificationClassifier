@@ -49,7 +49,14 @@ while(True):
 ################### Extract data ###########################
 kmerData = []
 
-for i in range(len(controlHela)):
+#get smaller length
+if len(controlHela) > len(pseudoHela):
+    small = len(pseudoHela)
+else:
+    small = len(controlHela)
+
+
+for i in range(small):
     kmer = controlHela.iloc[i, 0]
     kmerData.append([kmer])
 
@@ -71,12 +78,10 @@ for i in range(len(controlHela)):
             sig += values[j]
         
 
-
 pseudoKmerData = []
-for i in range(len(pseudoHela)):
+for i in range(small):
     kmer = pseudoHela.iloc[i, 0]
     pseudoKmerData.append([kmer])
-
     values = pseudoHela.iloc[i, 1]
     sig = ""
     for j in range(len(values)):
@@ -84,12 +89,10 @@ for i in range(len(pseudoHela)):
             #convert to int
             pseudoKmerData[i].append(int(sig))
             sig = ""
-
         elif j == (len(values) - 1):
             sig += values[j]
             pseudoKmerData[i].append(int(sig))
             sig = ""
-
         else:
             sig += values[j]
 
@@ -101,13 +104,13 @@ Y = []
 Yval = []
 
 #get random indexes
-prevIndexes = np.random.choice(len(controlHela), len(pseudoHela), replace=False)
+#prevIndexes = np.random.choice(len(controlHela), len(pseudoHela), replace=False)
 
 #set length to 300(random choices)
 totalControlKmerData = np.array(kmerData)
-kmerData = np.array(kmerData)[prevIndexes]
-print("size of ", len(kmerData))
-total = len(pseudoHela) * 2
+#kmerData = np.array(kmerData)[prevIndexes]
+#print("size of ", len(kmerData))
+#total = len(pseudoHela) * 2
 #indexes = np.random.choice(total, total, replace=False)
 
 allKmerData = []
@@ -148,8 +151,8 @@ enc.fit(X)
 
 def getKnnData():
     #get 2000 signal instances from controls
-    index = np.random.choice(len(controlHela), len(pseudoHela), replace=False)
-    kmerData = totalControlKmerData[index]
+    #index = np.random.choice(len(controlHela), len(pseudoHela), replace=False)
+    kmerData = totalControlKmerData
     knnDatax = []
     knnDatay = []
     for i in range(len(kmerData)):
@@ -167,8 +170,8 @@ def getKnnData():
 
 
 def getCnnData():
-    index = np.random.choice(len(controlHela), len(pseudoHela), replace=False)
-    kmerData = totalControlKmerData[index]
+    #index = np.random.choice(len(controlHela), len(pseudoHela), replace=False)
+    kmerData = totalControlKmerData
     CnnDatax = []
     CnnDatay = []
     for i in range(len(kmerData)):
@@ -186,8 +189,8 @@ def getCnnData():
 
 
 def getKmerRnnData():
-    index = np.random.choice(len(controlHela), len(pseudoHela), replace=False)
-    kmerData = totalControlKmerData[index]
+    #index = np.random.choice(len(controlHela), len(pseudoHela), replace=False)
+    kmerData = totalControlKmerData
     rnnDatax = []
     rnnDatay = []
     kmers = []
@@ -227,7 +230,7 @@ def getKmerRnnData():
         
     tempx = []
     for i in range(len(pseudoKmerData)):
-        #signal input
+        #signal input 
         tempx = []
         tempx.append(median(pseudoKmerData[i][1:]))
         tempx.append(mean(pseudoKmerData[i][1:]))
@@ -250,8 +253,8 @@ def getKmerRnnData():
 
 
 def getRnnData():
-    index = np.random.choice(len(controlHela), len(pseudoHela), replace=False)
-    kmerData = totalControlKmerData[index]
+    #index = np.random.choice(len(controlHela), len(pseudoHela), replace=False)
+    kmerData = totalControlKmerData
     rnnDatax = []
     rnnDatay = []
     for i in range(len(kmerData)):
@@ -266,8 +269,8 @@ def getRnnData():
 
 
 def getSvmData():
-    index = np.random.choice(len(controlHela), 1000, replace=False)
-    kmerData = totalControlKmerData[index]
+    #index = np.random.choice(len(controlHela), 1000, replace=False)
+    kmerData = totalControlKmerData
     svmDatax = []
     svmDatay = []
 
@@ -392,18 +395,22 @@ stats.signal_amplitude_mean(x, y)
 
 '''
 x, y = getRnnData()
-x, y = signal.signal_data(x, y)
+#x, y = signal.signal_data(x, y)
 
-ann.run_ann(x, y)
+#ann.run_ann(x, y)
+#stats.get_signal_distribution(x, y)
+stats.signal_amplitude_mean(x, y)
+stats.std_deviation_distribution(x, y)
 
-'''
+
+
 #fourier.read_signal(x, y)
 #rnet = rnn.createRNN()
 #rnet.createNet(x, y)
 lstmNet = rnn.createRNN(x, y)
 batch, batchy, test, test_out = lstmNet.createBatchData()
-model = lstmNet.prepareRNN(batch, batchy)'''
-'''
+lstmNet.prepareRNN(batch, batchy)
+
 #lstmNet.runLSTM(model)
 
-'''
+
